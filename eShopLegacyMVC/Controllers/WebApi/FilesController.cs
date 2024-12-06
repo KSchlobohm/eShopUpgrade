@@ -1,15 +1,17 @@
-﻿using eShopLegacy.Utilities;
+using eShopLegacy.Utilities;
 using eShopLegacyMVC.Services;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System.Text;
+
 
 namespace eShopLegacyMVC.Controllers.WebApi
 {
-    public class FilesController : ApiController
-    {
+[ApiController]    public class FilesController :ControllerBase    {
         private ICatalogService _service;
 
         public FilesController(ICatalogService service)
@@ -27,9 +29,12 @@ namespace eShopLegacyMVC.Controllers.WebApi
                     Brand = b.Brand
                 }).ToList();
             var serializer = new Serializing();
+            var serializedData = serializer.SerializeBinary(brands);
+            var byteArray = Encoding.UTF8.GetBytes(serializedData);
+            var memoryStream = new MemoryStream(byteArray);
             var response = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StreamContent(serializer.SerializeBinary(brands))
+                Content = new StreamContent(memoryStream)
             };
 
             return response;

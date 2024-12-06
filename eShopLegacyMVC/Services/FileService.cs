@@ -1,11 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Web;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Win32.SafeHandles;
+using System.Threading.Tasks;
 
 namespace eShopLegacyMVC.Services
 {
@@ -24,72 +27,77 @@ namespace eShopLegacyMVC.Services
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public static FileService Create() =>
-            new FileService(new FileServiceConfiguration
+        public static FileService Create()
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            return new FileService(new FileServiceConfiguration
             {
-                BasePath = ConfigurationManager.AppSettings["Files:BasePath"],
-                ServiceAccountUsername = ConfigurationManager.AppSettings["Files:ServiceAccountUsername"],
-                ServiceAccountDomain = ConfigurationManager.AppSettings["Files:ServiceAccountDomain"],
-                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"]
+                BasePath = configuration.GetSection("Files:BasePath").Value,
+                ServiceAccountUsername = configuration.GetSection("Files:ServiceAccountUsername").Value,
+                ServiceAccountDomain = configuration.GetSection("Files:ServiceAccountDomain").Value,
+                ServiceAccountPassword = configuration.GetSection("Files:ServiceAccountPassword").Value
             });
+        }
 
         public IEnumerable<string> ListFiles()
         {
             var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
+                ? WindowsIdentity.GetCurrent().AccessToken
                 : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            return WindowsIdentity.RunImpersonated(authToken, () =>
             {
                 return Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName);
-            }
+            });
         }
 
         public byte[] DownloadFile(string filename)
         {
             var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
+                ? WindowsIdentity.GetCurrent().AccessToken
                 : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            return WindowsIdentity.RunImpersonated(authToken, () =>
             {
                 var path = Path.Combine(configuration.BasePath, filename);
                 return File.ReadAllBytes(path);
-            }
+            });
         }
 
-        public void UploadFile(HttpFileCollectionBase files)
+public async Task UploadFile(IFormFileCollection files)
         {
             var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
+                ? WindowsIdentity.GetCurrent().AccessToken
                 : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            await WindowsIdentity.RunImpersonatedAsync(authToken, async () =>
             {
-
                 for (var i = 0; i < files.Count; i++)
                 {
                     var file = files[i];
                     var filename = Path.GetFileName(file.FileName);
                     var path = Path.Combine(configuration.BasePath, filename);
 
-                    using (var fs = File.Create(path))
+using (var fs = File.Create(path))
                     {
-                        // TODO - Switch to CopyToAsync when upgrading to .NET 8
-                        file.InputStream.CopyTo(fs);
+                        await file.CopyToAsync(fs);
                     }
                 }
-            }
+            });
         }
 
-        private IntPtr GetAuthToken(string username, string domain, string password)
+        private SafeAccessTokenHandle GetAuthToken(string username, string domain, string password)
         {
             if (!LogonUser(username, domain, password, LOGON32_LOGON_NEWCREDENTIALS, LOGON32_PROVIDER_DEFAULT, out IntPtr authToken))
             {
                 throw new InvalidOperationException($"Unable to get auth token for service account {username} in domain {domain}");
             }
 
-            return authToken;
+            return new SafeAccessTokenHandle(authToken);
         }
     }
 }
