@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
@@ -7,8 +8,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.Hosting;
 
 namespace eShopLegacyMVC.Models.Infrastructure
 {
@@ -20,13 +19,16 @@ namespace eShopLegacyMVC.Models.Infrastructure
         private const string CatalogBrandHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_brand_hilo.Sequence.sql";
         private const string CatalogTypeHiLoSequenceScript = @"Models\Infrastructure\dbo.catalog_type_hilo.Sequence.sql";
 
+        private readonly IHostEnvironment env;
+
         private CatalogItemHiLoGenerator indexGenerator;
         private bool useCustomizationData;
 
-        public CatalogDBInitializer(CatalogItemHiLoGenerator indexGenerator)
+        public CatalogDBInitializer(IHostEnvironment env, IOptions<DataSettings> options, CatalogItemHiLoGenerator indexGenerator)
         {
+            this.env = env;
             this.indexGenerator = indexGenerator;
-            useCustomizationData = bool.Parse(ConfigurationManager.AppSettings["UseCustomizationData"]);
+            useCustomizationData = options.Value.UseCustomizationData;
         }
 
         protected override void Seed(CatalogDBContext context)
@@ -94,7 +96,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
 
         private IEnumerable<CatalogType> GetCatalogTypesFromFile()
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = env.ContentRootPath;
             string csvFileCatalogTypes = Path.Combine(contentRootPath, "Setup", "CatalogTypes.csv");
 
             if (!File.Exists(csvFileCatalogTypes))
@@ -128,9 +130,9 @@ namespace eShopLegacyMVC.Models.Infrastructure
             };
         }
 
-        static IEnumerable<CatalogBrand> GetCatalogBrandsFromFile()
+        IEnumerable<CatalogBrand> GetCatalogBrandsFromFile()
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = env.ContentRootPath;
             string csvFileCatalogBrands = Path.Combine(contentRootPath, "Setup", "CatalogBrands.csv");
 
             if (!File.Exists(csvFileCatalogBrands))
@@ -164,9 +166,9 @@ namespace eShopLegacyMVC.Models.Infrastructure
             };
         }
 
-        static IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
+        IEnumerable<CatalogItem> GetCatalogItemsFromFile(CatalogDBContext context)
         {
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = env.ContentRootPath;
             string csvFileCatalogItems = Path.Combine(contentRootPath, "Setup", "CatalogItems.csv");
 
             if (!File.Exists(csvFileCatalogItems))
@@ -342,7 +344,7 @@ namespace eShopLegacyMVC.Models.Infrastructure
             {
                 return;
             }
-            var contentRootPath = HostingEnvironment.ApplicationPhysicalPath;
+            var contentRootPath = env.ContentRootPath;
             DirectoryInfo picturePath = new DirectoryInfo(Path.Combine(contentRootPath, "Pics"));
             foreach (FileInfo file in picturePath.GetFiles())
             {

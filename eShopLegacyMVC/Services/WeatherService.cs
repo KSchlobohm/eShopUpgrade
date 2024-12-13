@@ -11,32 +11,31 @@ namespace eShopLegacyMVC.Services
         const int DefaultZipCode = 98052;
         const string RequestFormatString = "http://api.weatherapi.com/v1/current.json?key={0}&q={1}&aqi=no";
         private readonly string _apiKey;
+        private readonly HttpClient _httpClient;
 
-        public WeatherService(string apiKey)
+        public WeatherService(string apiKey, HttpClient httpClient)
         {
             _apiKey = apiKey ?? Environment.GetEnvironmentVariable("WEATHER_API_KEY");
+            _httpClient = httpClient;
         }
 
-        public int? GetUserCurrentTemperature(ApplicationUser user, bool celsius)
+        public async Task<int?> GetUserCurrentTemperature(ApplicationUser user, bool celsius)
         {
-            var zipCode = user.ZipCode ?? DefaultZipCode;
+            var zipCode = (await user.GetZipCode(_httpClient)) ?? DefaultZipCode;
 
-            return GetTemperature(zipCode, celsius);
+            return await GetTemperature(zipCode, celsius);
         }
 
-        private int? GetTemperature(int zipCode, bool celsius)
+        private async Task<int?> GetTemperature(int zipCode, bool celsius)
         {
-            using (var client = new WebClient())
+            var response = await _httpClient.GetStringAsync(string.Format(RequestFormatString, _apiKey, zipCode));
+
+            if (!string.IsNullOrEmpty(response))
             {
-                var data = client.DownloadData(string.Format(RequestFormatString, _apiKey, zipCode));
-
-                if (data != null && data.Length > 0)
+                var weatherData = JsonConvert.DeserializeAnonymousType(response, new { Current = new { Temp_C = 0, Temp_F = 0 } });
+                if (weatherData != null)
                 {
-                    var weatherData = JsonConvert.DeserializeAnonymousType(Encoding.UTF8.GetString(data), new { Current = new { Temp_C = 0, Temp_F = 0 } });
-                    if (weatherData != null)
-                    {
-                        return celsius ? weatherData.Current.Temp_C : weatherData.Current.Temp_F;
-                    }
+                    return celsius ? weatherData.Current.Temp_C : weatherData.Current.Temp_F;
                 }
             }
 

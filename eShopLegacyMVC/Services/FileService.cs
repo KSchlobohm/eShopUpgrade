@@ -1,85 +1,86 @@
-﻿using System;
+﻿using eShopLegacyMVC.Models;
+using Microsoft.Extensions.Options;
+using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Principal;
-using System.Web;
 
 namespace eShopLegacyMVC.Services
 {
+    [SupportedOSPlatform("windows")]
     public class FileService
     {
         private const int LOGON32_PROVIDER_DEFAULT = 0;
         private const int LOGON32_LOGON_NEWCREDENTIALS = 9;
 
-        private readonly FileServiceConfiguration configuration;
+        private readonly FileSettings settings;
 
         [DllImport("advapi32.dll", SetLastError = true)]
         public static extern bool LogonUser(string lpszUsername, string lpszDomain, string lpszPassword, int dwLogonType, int dwLogonProvider, out IntPtr phToken);
 
-        public FileService(FileServiceConfiguration configuration)
-        {
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        }
+        public FileService(IOptions<FileSettings> options)
 
-        public static FileService Create() =>
-            new FileService(new FileServiceConfiguration
-            {
-                BasePath = ConfigurationManager.AppSettings["Files:BasePath"],
-                ServiceAccountUsername = ConfigurationManager.AppSettings["Files:ServiceAccountUsername"],
-                ServiceAccountDomain = ConfigurationManager.AppSettings["Files:ServiceAccountDomain"],
-                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"]
-            });
+        {
+            this.settings = options.Value;
+            ArgumentException.ThrowIfNullOrEmpty(settings.BasePath, nameof(settings.BasePath));
+        }
 
         public IEnumerable<string> ListFiles()
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
+            var authToken = string.IsNullOrEmpty(settings.ServiceAccountId)
                 ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+                : GetAuthToken(settings.ServiceAccountId, settings.ServiceAccountDomain, settings.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            using var tokenHandle = new SafeAccessTokenHandle(authToken);
+            return WindowsIdentity.RunImpersonated(tokenHandle, () =>
             {
-                return Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName);
-            }
+                return Directory.GetFiles(settings.BasePath).Select(Path.GetFileName);
+            });
         }
 
         public byte[] DownloadFile(string filename)
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
+            var authToken = string.IsNullOrEmpty(settings.ServiceAccountId) || string.IsNullOrEmpty(settings.ServiceAccountDomain) || string.IsNullOrEmpty(settings.ServiceAccountPassword)
                 ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+                : GetAuthToken(settings.ServiceAccountId, settings.ServiceAccountDomain, settings.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            using var tokenHandle = new SafeAccessTokenHandle(authToken);
+            return WindowsIdentity.RunImpersonated(tokenHandle, () =>
             {
-                var path = Path.Combine(configuration.BasePath, filename);
+                var path = Path.Combine(settings.BasePath, filename);
                 return File.ReadAllBytes(path);
-            }
+            });
         }
 
-        public void UploadFile(HttpFileCollectionBase files)
-        {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+        public void UploadFile(IFormFileCollection files)
+        {
+            var authToken = string.IsNullOrEmpty(settings.ServiceAccountId)
+                ? WindowsIdentity.GetCurrent().Token
+                : GetAuthToken(settings.ServiceAccountId, settings.ServiceAccountDomain, settings.ServiceAccountPassword);
+
+            using var tokenHandle = new SafeAccessTokenHandle(authToken);
+            WindowsIdentity.RunImpersonated(tokenHandle, () =>
             {
 
                 for (var i = 0; i < files.Count; i++)
                 {
                     var file = files[i];
                     var filename = Path.GetFileName(file.FileName);
-                    var path = Path.Combine(configuration.BasePath, filename);
+                    var path = Path.Combine(settings.BasePath, filename);
 
                     using (var fs = File.Create(path))
                     {
                         // TODO - Switch to CopyToAsync when upgrading to .NET 8
-                        file.InputStream.CopyTo(fs);
+                        file.CopyTo(fs);
                     }
                 }
-            }
+            });
         }
 
         private IntPtr GetAuthToken(string username, string domain, string password)
