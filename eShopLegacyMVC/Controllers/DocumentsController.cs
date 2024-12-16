@@ -2,9 +2,11 @@ using eShopLegacyMVC.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
+using System.Runtime.Versioning;
 
 namespace eShopLegacyMVC.Controllers
 {
+    [SupportedOSPlatform("windows")]
     public class DocumentsController : Controller
     {
         // GET: Files

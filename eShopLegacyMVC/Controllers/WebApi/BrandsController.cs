@@ -9,7 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC.Controllers.WebApi
 {
-[ApiController]    public class BrandsController :ControllerBase    {
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BrandsController : Controller
+    {
         private ICatalogService _service;
 
         public BrandsController(ICatalogService service)
@@ -18,6 +21,7 @@ namespace eShopLegacyMVC.Controllers.WebApi
         }
 
         // GET api/<controller>
+        [HttpGet]
         public IEnumerable<Models.CatalogBrand> Get()
         {
             var brands = _service.GetCatalogBrands();
@@ -25,6 +29,7 @@ namespace eShopLegacyMVC.Controllers.WebApi
         }
 
         // GET api/<controller>/5
+        [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             var brands = _service.GetCatalogBrands();
@@ -34,18 +39,18 @@ namespace eShopLegacyMVC.Controllers.WebApi
             return Ok(brand);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         // DELETE api/<controller>/5
         public IActionResult Delete(int id)
         {
             var brandToDelete = _service.GetCatalogBrands().FirstOrDefault(x => x.Id == id);
             if (brandToDelete == null)
             {
-                return StatusCode((int)HttpStatusCode.NotFound);
+                return NotFound();
             }
 
             // demo only - don't actually delete
-            return StatusCode((int)HttpStatusCode.OK);
+            return Ok();
         }
     }
 }

@@ -12,6 +12,11 @@
     <AssemblyName>eShopLegacy.Utilities</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+	<AssemblyTitle>eShopLegacy.Utilities</AssemblyTitle>
+	<Product>eShopLegacy Demo</Product>
+	<Copyright>Copyright © 2022 Microsoft</Copyright>
+	<AssemblyVersion>1.0.0.0</AssemblyVersion>
+	<FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

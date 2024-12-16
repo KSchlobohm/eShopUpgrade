@@ -11,7 +11,10 @@ using System.Text;
 
 namespace eShopLegacyMVC.Controllers.WebApi
 {
-[ApiController]    public class FilesController :ControllerBase    {
+    [ApiController]
+    [Route("api/[controller]")]
+    public class FilesController : Controller
+    {
         private ICatalogService _service;
 
         public FilesController(ICatalogService service)
@@ -20,6 +23,7 @@ namespace eShopLegacyMVC.Controllers.WebApi
         }
 
         // GET api/<controller>
+        [HttpGet]
         public HttpResponseMessage Get()
         {
             var brands = _service.GetCatalogBrands()
@@ -29,12 +33,9 @@ namespace eShopLegacyMVC.Controllers.WebApi
                     Brand = b.Brand
                 }).ToList();
             var serializer = new Serializing();
-            var serializedData = serializer.SerializeBinary(brands);
-            var byteArray = Encoding.UTF8.GetBytes(serializedData);
-            var memoryStream = new MemoryStream(byteArray);
             var response = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StreamContent(memoryStream)
+                Content = new StreamContent(serializer.SerializeBinary(brands))
             };
 
             return response;

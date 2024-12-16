@@ -8,15 +8,6 @@ namespace eShopLegacyMVC.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
-        {
-// Generate a new ClaimsIdentity using the user's claims
-            var claims = await manager.GetClaimsAsync(this);
-            var userIdentity = new ClaimsIdentity(claims, "ApplicationCookie");
-            // Add custom user claims here if needed
-            return userIdentity;
-        }
-
         private int? _zipCode = null;
 
         public int? ZipCode

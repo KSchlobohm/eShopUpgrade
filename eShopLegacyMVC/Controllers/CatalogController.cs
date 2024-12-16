@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using MSMQ.Messaging;
+using Microsoft.Extensions.Configuration;
 
 
 namespace eShopLegacyMVC.Controllers
@@ -20,10 +22,12 @@ namespace eShopLegacyMVC.Controllers
         private static readonly ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private ICatalogService service;
+        private readonly IConfiguration configuration;
 
-        public CatalogController(ICatalogService service)
+        public CatalogController(ICatalogService service, IConfiguration configuration)
         {
             this.service = service;
+            this.configuration = configuration;
         }
 
         // GET /[?pageSize=3&pageIndex=10]
@@ -84,10 +88,18 @@ namespace eShopLegacyMVC.Controllers
 
         private void QueueItemCreatedMessage(CatalogItem catalogItem)
         {
-// TODO: Implement message queuing using a .NET Core compatible solution
-            // For example, you could use Azure Service Bus, RabbitMQ, or another messaging system
-            // This is a placeholder and should be replaced with actual implementation
-            _log.Info($"New catalog item created: {catalogItem.Name}");
+            var itemQueuePath = configuration["appsettings:NewItemQueuePath"];
+            using (var queue = new MessageQueue(itemQueuePath))
+            {
+                var message = new Message
+                {
+                    Formatter = new XmlMessageFormatter(new[] { typeof(CatalogItem) }),
+                    Body = catalogItem,
+                    Label = "New catalog item"
+                };
+
+                queue.Send(message);
+            }
         }
 
         // GET: Catalog/Edit/5

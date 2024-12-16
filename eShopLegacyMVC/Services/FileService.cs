@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Win32.SafeHandles;
 using System.Threading.Tasks;
+using System.Runtime.Versioning;
 
 namespace eShopLegacyMVC.Services
 {
+    [SupportedOSPlatform("windows")]
     public class FileService
     {
         private const int LOGON32_PROVIDER_DEFAULT = 0;
@@ -36,10 +38,10 @@ namespace eShopLegacyMVC.Services
 
             return new FileService(new FileServiceConfiguration
             {
-                BasePath = configuration.GetSection("Files:BasePath").Value,
-                ServiceAccountUsername = configuration.GetSection("Files:ServiceAccountUsername").Value,
-                ServiceAccountDomain = configuration.GetSection("Files:ServiceAccountDomain").Value,
-                ServiceAccountPassword = configuration.GetSection("Files:ServiceAccountPassword").Value
+                BasePath = configuration.GetSection("appsettings:files:BasePath").Value,
+                ServiceAccountUsername = configuration.GetSection("appsettings:files:ServiceAccountUsername").Value,
+                ServiceAccountDomain = configuration.GetSection("appsettings:files:ServiceAccountDomain").Value,
+                ServiceAccountPassword = configuration.GetSection("appsettings:files:ServiceAccountPassword").Value
             });
         }
 
@@ -68,13 +70,13 @@ namespace eShopLegacyMVC.Services
             });
         }
 
-public async Task UploadFile(IFormFileCollection files)
+        public void UploadFile(IFormFileCollection files)
         {
             var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
                 ? WindowsIdentity.GetCurrent().AccessToken
                 : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            await WindowsIdentity.RunImpersonatedAsync(authToken, async () =>
+            WindowsIdentity.RunImpersonated(authToken, () =>
             {
                 for (var i = 0; i < files.Count; i++)
                 {
@@ -82,9 +84,9 @@ public async Task UploadFile(IFormFileCollection files)
                     var filename = Path.GetFileName(file.FileName);
                     var path = Path.Combine(configuration.BasePath, filename);
 
-using (var fs = File.Create(path))
+                    using (var fs = File.Create(path))
                     {
-                        await file.CopyToAsync(fs);
+                        file.CopyTo(fs);
                     }
                 }
             });

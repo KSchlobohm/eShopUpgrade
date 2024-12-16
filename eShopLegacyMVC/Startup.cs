@@ -1,14 +1,25 @@
-/* Added by CTA: Please add the correponding references..If certs are not provided for deployment communication will be on http, please remove the https section of the kestrel config in appsettings.json and also remove middleware component app.UseHttpsRedirection(); */
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using eShopLegacyMVC.Models.Infrastructure;
+using eShopLegacyMVC.Models;
+using eShopLegacyMVC.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
+using System.Data.Entity;
+using log4net;
+using System.Reflection;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +30,6 @@ namespace eShopLegacyMVC
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            ConfigurationManager.Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -28,6 +38,7 @@ namespace eShopLegacyMVC
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddResponseCaching();
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
@@ -35,11 +46,72 @@ namespace eShopLegacyMVC
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+            services.AddScoped<CatalogService>();
+            services.AddScoped<CatalogServiceMock>();
+            services.AddScoped(sp =>
+            {
+                var useMockData = Configuration.GetValue<bool>("appsettings:UseMockData");
+                return useMockData
+                    ? sp.GetRequiredService<CatalogServiceMock>() as ICatalogService
+                    : sp.GetRequiredService<CatalogService>();
+            });
+            services.AddScoped(sp => new CatalogDBContext(
+                sp.GetRequiredService<IConfiguration>().GetConnectionString("CatalogDBContext")
+                ?? string.Empty));
+            services.AddScoped<CatalogDBInitializer>();
+            services.AddSingleton<CatalogItemHiLoGenerator>();
+
+            // Identity-related services
+            services.AddDbContext<IdentityDbContext<ApplicationUser>>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("IdentityDBContext"));
+            });
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<IdentityDbContext<ApplicationUser>>()
+                .AddDefaultTokenProviders();
+
+            services.AddSystemWebAdapters();
+
+            // Add bundling and minification services and configuration
+            services.AddWebOptimizer(pipeline =>
+            {
+                pipeline.AddJavaScriptBundle("/bundles/jquery", "wwwroot/Scripts/jquery-*.js")
+                    .UseContentRoot();
+
+                pipeline.AddJavaScriptBundle("/bundles/jqueryval", "wwwroot/Scripts/jquery.validate*")
+                    .UseContentRoot();
+
+                pipeline.AddJavaScriptBundle("/bundles/modernizr", "wwwroot/Scripts/modernizr-*")
+                    .UseContentRoot();
+
+                pipeline.AddJavaScriptBundle("/bundles/bootstrap", "wwwroot/Scripts/bootstrap.js", "wwwroot/Scripts/respond.js")
+                    .UseContentRoot();
+
+                pipeline.AddCssBundle("/Content/css",
+                                      "wwwroot/Content/bootstrap.css",
+                                      "wwwroot/Content/custom.css",
+                                      "wwwroot/Content/base.css",
+                                      "wwwroot/Content/site.css")
+                    .UseContentRoot();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // Set EF6 DB initializer
+            var mockData = Configuration.GetValue<bool>("DataSettings:UseMockData");
+            if (!mockData)
+            {
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    Database.SetInitializer(services.GetRequiredService<CatalogDBInitializer>());
+                }
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -50,22 +122,42 @@ namespace eShopLegacyMVC
             }
 
             app.UseHttpsRedirection();
+            app.UseWebOptimizer();
             app.UseStaticFiles();
-            app.UseSession();
-            // Remove or replace these middleware calls as they might not be compatible with ASP.NET Core
-            // app.UseMiddleware<Microsoft.AspNet.TelemetryCorrelation.TelemetryCorrelationHttpModule, Microsoft.AspNet.TelemetryCorrelation>();
-            // app.UseMiddleware<Microsoft.ApplicationInsights.Web.ApplicationInsightsHttpModule, Microsoft.AI.Web>();
+
+            app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseResponseCaching();
+            app.UseSystemWebAdapters();
+
+            app.UseSession();
+
+            // Middleware for implementing functionality that used to live in custom HttpApplication
+            app.Use(async (context, next) =>
+            {
+                var log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+                // Set LogicalThreadContext
+                LogicalThreadContext.Properties["activityid"] = new ActivityIdHelper();
+                LogicalThreadContext.Properties["requestinfo"] = new WebRequestInfo(context);
+
+                log.Debug("WebApplication_BeginRequest");
+
+                // Session_Start
+                if (context.Session.IsAvailable && !context.Session.Keys.Contains("SessionStartTime"))
+                {
+                    context.Session.SetString("MachineName", Environment.MachineName);
+                    context.Session.SetString("SessionStartTime", DateTime.Now.ToString());
+                }
+
+                await next();
+            });
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(name: "default", pattern: "{controller=Catalog}/{action=Index}/{id?}");
             });
         }
-    }
-
-    public class ConfigurationManager
-    {
-        public static IConfiguration Configuration { get; set; }
     }
 }

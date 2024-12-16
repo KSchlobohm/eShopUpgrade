@@ -5,14 +5,17 @@ namespace eShopLegacy.Utilities
 {
     public class Serializing
     {
-        public string SerializeBinary(object input)
+        public Stream SerializeBinary<T>(T input)
         {
-            return JsonSerializer.Serialize(input);
+            var stream = new MemoryStream();
+            JsonSerializer.Serialize(stream, input);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
         }
 
-        public object DeserializeBinary(string json)
+        public T DeserializeBinary<T>(Stream stream)
         {
-            return JsonSerializer.Deserialize<object>(json);
+            return JsonSerializer.Deserialize<T>(stream);
         }
     }
 }
