@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
     <TypeScriptToolsVersion>4.4</TypeScriptToolsVersion>
     <_MigrateToProjectGuid>4bda894c-f941-4b8a-a192-28d4d861927d</_MigrateToProjectGuid>
     <AssemblyTitle>eShopLegacyMVC</AssemblyTitle>
@@ -18,12 +19,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <UserSecretsId>bc3db244-132b-4e6b-8feb-4fa99a7aba19</UserSecretsId>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Update="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <Content Include="Content\base.css" />
     <Content Include="Content\bootstrap-grid.css" />
@@ -36,7 +33,6 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\Montserrat-Bold.svg" />
     <Content Include="fonts\Montserrat-Regular.svg" />
-    <Content Include="Global.asax" />
     <Content Include="Content\site.css" />
     <Content Include="Images\brand.png" />
     <Content Include="Images\brand_dark.png" />
@@ -147,9 +143,6 @@
     <Content Include="Scripts\popper-utils.js.map" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
@@ -160,47 +153,16 @@
     <ProjectReference Include="..\eShopLegacy.Utilities\eShopLegacy.Utilities.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.9.1" />
-    <PackageReference Include="Autofac.Mvc5" Version="4.0.2" />
-    <PackageReference Include="Autofac.WebApi2" Version="4.3.1" />
-    <PackageReference Include="bootstrap" Version="4.3.1" />
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
-    <PackageReference Include="jQuery" Version="3.3.1" />
-    <PackageReference Include="jQuery.Validation" Version="1.17.0" />
-    <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.9.1" />
-    <PackageReference Include="Microsoft.ApplicationInsights.Agent.Intercept" Version="2.4.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.9.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.PerfCounterCollector" Version="2.9.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.Web" Version="2.9.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.WindowsServer" Version="2.9.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel" Version="2.9.1" />
-    <PackageReference Include="Microsoft.AspNet.SessionState.SessionStateModule" Version="1.1.0" />
-    <PackageReference Include="Microsoft.AspNet.TelemetryCorrelation" Version="1.0.5" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.jQuery.Unobtrusive.Validation" Version="3.2.11" />
-    <PackageReference Include="Microsoft.Net.Compilers" Version="2.10.0" />
-    <PackageReference Include="Modernizr" Version="2.8.3" />
+    <PackageReference Include="EntityFramework" Version="6.5.1" />
+    <PackageReference Include="LigerShark.WebOptimizer.Core" Version="3.0.433" />
+    <PackageReference Include="log4net" Version="3.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+	</PackageReference>
+	<PackageReference Include="MSMQ.Messaging" Version="1.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Pipelines.Sockets.Unofficial" Version="1.0.7" />
-    <PackageReference Include="popper.js" Version="1.14.3" />
-    <PackageReference Include="Respond" Version="1.4.2" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
-    <PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
-    <PackageReference Include="System.Management" Version="9.0.0" />
-    <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
-    <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
-    <PackageReference Include="WebGrease" Version="1.6.0" />
-    <PackageReference Include="Antlr4" Version="4.6.6" />
-    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
-    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="4.1.0" />
-    <PackageReference Include="Owin" Version="1.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
   </ItemGroup>
 </Project>

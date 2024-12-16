@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC.Controllers.WebApi
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class FilesController : ControllerBase
     {
         private ICatalogService _service;
@@ -18,6 +20,7 @@ namespace eShopLegacyMVC.Controllers.WebApi
         }
 
         // GET api/<controller>
+        [HttpGet]
         public HttpResponseMessage Get()
         {
             var brands = _service.GetCatalogBrands()
