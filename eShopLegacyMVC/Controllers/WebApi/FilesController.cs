@@ -4,11 +4,11 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC.Controllers.WebApi
 {
-    public class FilesController : ApiController
+    public class FilesController : ControllerBase
     {
         private ICatalogService _service;
 

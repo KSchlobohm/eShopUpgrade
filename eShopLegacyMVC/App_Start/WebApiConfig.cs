@@ -1,5 +1,4 @@
-﻿using System.Web.Http;
-
+﻿
 namespace eShopLegacyMVC
 {
     public class WebApiConfig

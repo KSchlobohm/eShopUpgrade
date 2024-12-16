@@ -1,6 +1,4 @@
-﻿using Microsoft.Owin;
-using Owin;
-using System;
+﻿using System;
 
 [assembly: OwinStartupAttribute(typeof(eShopLegacyMVC.Startup))]
 namespace eShopLegacyMVC

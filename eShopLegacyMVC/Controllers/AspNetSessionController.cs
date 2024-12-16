@@ -1,5 +1,5 @@
 ﻿using eShopLegacy.Models;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC.Controllers
 {
