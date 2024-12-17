@@ -1,9 +1,12 @@
 ﻿using eShopLegacyMVC.Services;
 using System.Web;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using System.Runtime.Versioning;
 
 namespace eShopLegacyMVC.Controllers
 {
+    [SupportedOSPlatform("windows")]
     public class DocumentsController : Controller
     {
         // GET: Files
@@ -13,12 +16,18 @@ namespace eShopLegacyMVC.Controllers
             return View(files);
         }
 
-        [ResponseCache(VaryByParam = "filename", Duration = int.MaxValue)]
+        [ResponseCache(VaryByQueryKeys = new[] { "filename" }, Duration = int.MaxValue)]
         public FileResult Download(string filename)
         {
             var fileService = FileService.Create();
             var file = fileService.DownloadFile(filename);
-            FileContentResult fc = new FileContentResult(file, MimeMapping.GetMimeMapping(filename));
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filename, out string contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            FileContentResult fc = new FileContentResult(file, contentType);
+
             fc.FileDownloadName = filename;
             return fc;
         }
@@ -29,10 +38,10 @@ namespace eShopLegacyMVC.Controllers
         }
 
         [HttpPost]
-        public ActionResult UploadDocument()
+        public ActionResult UploadDocument(IFormFileCollection files)
         {
             var fileService = FileService.Create();
-            fileService.UploadFile(Request.Files);
+            fileService.UploadFile(files);
             return RedirectToAction("Index");
         }
     }

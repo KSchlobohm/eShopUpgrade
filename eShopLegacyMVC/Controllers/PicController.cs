@@ -12,10 +12,12 @@ namespace eShopLegacyMVC.Controllers
 
         public const string GetPicRouteName = "GetPicRouteTemplate";
 
+        private readonly IWebHostEnvironment env;
         private ICatalogService service;
 
-        public PicController(ICatalogService service)
+        public PicController(IWebHostEnvironment env, ICatalogService service)
         {
+            this.env = env;
             this.service = service;
         }
 
@@ -28,14 +30,14 @@ namespace eShopLegacyMVC.Controllers
 
             if (catalogItemId <= 0)
             {
-                return new StatusCodeResult((int) HttpStatusCode.BadRequest);
+                return new StatusCodeResult((int)HttpStatusCode.BadRequest);
             }
 
             var item = service.FindCatalogItem(catalogItemId);
 
             if (item != null)
             {
-                var webRoot = Server.MapPath("~/Pics");
+                var webRoot = Path.Combine(env.ContentRootPath, "Pics");
                 var path = Path.Combine(webRoot, item.PictureFileName);
 
                 string imageFileExtension = Path.GetExtension(item.PictureFileName);
