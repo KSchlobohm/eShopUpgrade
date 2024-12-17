@@ -5,11 +5,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.Remoting.Messaging;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC.Controllers.WebApi
 {
-    public class BrandsController : ApiController
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BrandsController : ControllerBase
     {
         private ICatalogService _service;
 
@@ -18,6 +20,8 @@ namespace eShopLegacyMVC.Controllers.WebApi
             _service = service;
         }
 
+        [HttpGet]
+
         // GET api/<controller>
         public IEnumerable<Models.CatalogBrand> Get()
         {
@@ -25,8 +29,10 @@ namespace eShopLegacyMVC.Controllers.WebApi
             return brands;
         }
 
+        [HttpGet("{id?}")]
+
         // GET api/<controller>/5
-        public IHttpActionResult Get(int id)
+        public IActionResult Get(int id)
         {
             var brands = _service.GetCatalogBrands();
             var brand = brands.FirstOrDefault(x => x.Id == id);
@@ -35,9 +41,9 @@ namespace eShopLegacyMVC.Controllers.WebApi
             return Ok(brand);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id?}")]
         // DELETE api/<controller>/5
-        public IHttpActionResult Delete(int id)
+        public IActionResult Delete(int id)
         {
             var brandToDelete = _service.GetCatalogBrands().FirstOrDefault(x => x.Id == id);
             if (brandToDelete == null)

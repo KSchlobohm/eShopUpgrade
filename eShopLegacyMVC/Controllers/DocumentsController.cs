@@ -1,6 +1,6 @@
 ﻿using eShopLegacyMVC.Services;
 using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC.Controllers
 {
@@ -13,7 +13,7 @@ namespace eShopLegacyMVC.Controllers
             return View(files);
         }
 
-        [OutputCache(VaryByParam = "filename", Duration = int.MaxValue)]
+        [ResponseCache(VaryByParam = "filename", Duration = int.MaxValue)]
         public FileResult Download(string filename)
         {
             var fileService = FileService.Create();
