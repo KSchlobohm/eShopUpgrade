@@ -13,6 +13,50 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="fonts\*.*" />
+    <Content Include="fonts\*.*">
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+	  
+	<None Remove="Images\*.*" />
+	<Content Include="Images\*.*">
+		<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</Content>
+	  
+    <None Remove="Models\Infrastructure\*.sql" />
+    <Content Include="Models\Infrastructure\*.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+	</Content>
+	  
+	<None Remove="Content\*.css" />	  
+	<Content Include="Content\*.css">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+	</Content>
+
+	<None Remove="Pics\*.png" />
+	<Content Include="Pics\*.png">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+	</Content>
+
+	<None Remove="Scripts\**\*.*" />	  
+	<Content Include="Scripts\**\*.*">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+	</Content>
+
+	<None Remove="Setup\*.*" />
+	<Content Include="Setup\*.*">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+	</Content>	  
+  </ItemGroup>
+	
+  <ItemGroup>
     <PackageReference Include="LigerShark.WebOptimizer.Core" Version="3.0.433" />
     <PackageReference Include="log4net" Version="3.0.3" />
 	<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
