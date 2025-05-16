@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Web;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Win32.SafeHandles;
 
 namespace eShopLegacyMVC.Services
 {
@@ -24,14 +26,22 @@ namespace eShopLegacyMVC.Services
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public static FileService Create() =>
-            new FileService(new FileServiceConfiguration
+        public static FileService Create()
+        {
+// Get configuration from appsettings.json using Microsoft.Extensions.Configuration
+            IConfiguration configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            return new FileService(new FileServiceConfiguration
             {
-                BasePath = ConfigurationManager.AppSettings["Files:BasePath"],
-                ServiceAccountUsername = ConfigurationManager.AppSettings["Files:ServiceAccountUsername"],
-                ServiceAccountDomain = ConfigurationManager.AppSettings["Files:ServiceAccountDomain"],
-                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"]
+                BasePath = configuration["Files:BasePath"],
+                ServiceAccountUsername = configuration["Files:ServiceAccountUsername"],
+                ServiceAccountDomain = configuration["Files:ServiceAccountDomain"],
+                ServiceAccountPassword = configuration["Files:ServiceAccountPassword"]
             });
+        }
 
         public IEnumerable<string> ListFiles()
         {
@@ -39,9 +49,12 @@ namespace eShopLegacyMVC.Services
                 ? WindowsIdentity.GetCurrent().Token
                 : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+using (var safeTokenHandle = new SafeAccessTokenHandle(authToken))
             {
-                return Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName);
+                return WindowsIdentity.RunImpersonated(safeTokenHandle, () =>
+                {
+                    return Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName);
+                });
             }
         }
 
@@ -51,10 +64,13 @@ namespace eShopLegacyMVC.Services
                 ? WindowsIdentity.GetCurrent().Token
                 : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+using (var safeTokenHandle = new SafeAccessTokenHandle(authToken))
             {
-                var path = Path.Combine(configuration.BasePath, filename);
-                return File.ReadAllBytes(path);
+                return WindowsIdentity.RunImpersonated(safeTokenHandle, () =>
+                {
+                    var path = Path.Combine(configuration.BasePath, filename);
+                    return File.ReadAllBytes(path);
+                });
             }
         }
 
@@ -64,21 +80,23 @@ namespace eShopLegacyMVC.Services
                 ? WindowsIdentity.GetCurrent().Token
                 : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
 
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+using (var safeTokenHandle = new SafeAccessTokenHandle(authToken))
             {
-
-                for (var i = 0; i < files.Count; i++)
+                WindowsIdentity.RunImpersonated(safeTokenHandle, () =>
                 {
-                    var file = files[i];
-                    var filename = Path.GetFileName(file.FileName);
-                    var path = Path.Combine(configuration.BasePath, filename);
-
-                    using (var fs = File.Create(path))
+                    for (var i = 0; i < files.Count; i++)
                     {
-                        // TODO - Switch to CopyToAsync when upgrading to .NET 8
-                        file.InputStream.CopyTo(fs);
+                        var file = files[i];
+                        var filename = Path.GetFileName(file.FileName);
+                        var path = Path.Combine(configuration.BasePath, filename);
+
+using (var fs = File.Create(path))
+                        {
+                            // TODO - Switch to CopyToAsync when upgrading to .NET 8
+                            file.InputStream.CopyTo(fs);
+                        }
                     }
-                }
+                });
             }
         }
 

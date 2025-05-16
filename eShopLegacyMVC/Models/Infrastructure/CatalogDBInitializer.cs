@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
+using Microsoft.Extensions.Configuration;
 using System.Data.Entity;
 using System.Globalization;
 using System.IO;
@@ -26,7 +27,8 @@ namespace eShopLegacyMVC.Models.Infrastructure
         public CatalogDBInitializer(CatalogItemHiLoGenerator indexGenerator)
         {
             this.indexGenerator = indexGenerator;
-            useCustomizationData = bool.Parse(ConfigurationManager.AppSettings["UseCustomizationData"]);
+            var configValue = System.Environment.GetEnvironmentVariable("UseCustomizationData") ?? "false";
+            useCustomizationData = bool.Parse(configValue);
         }
 
         protected override void Seed(CatalogDBContext context)
