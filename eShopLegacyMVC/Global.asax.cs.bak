@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Autofac.Integration.Mvc;
 using Autofac.Integration.WebApi;
 using eShopLegacyMVC.Models;
@@ -10,17 +10,21 @@ using System.Configuration;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Reflection;
-using System.Web;
 using System.Web.Http;
-using System.Web.Mvc;
 using System.Web.Optimization;
-using System.Web.Routing;
+using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.Routing;
+
+using Microsoft.AspNetCore.Http;
+
+using System.Threading.Tasks;
+
 
 namespace eShopLegacyMVC
 {
-    public class MvcApplication : HttpApplication
-    {
-        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+    public class MvcApplication     {
+RequestDelegate _next = null;        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         IContainer container;
 
@@ -89,7 +93,7 @@ namespace eShopLegacyMVC
                 Database.SetInitializer<CatalogDBContext>(container.Resolve<CatalogDBInitializer>());
             }
         }
-
+publicMvcApplication(RequestDelegatenext){}
     }
 
     public class ActivityIdHelper

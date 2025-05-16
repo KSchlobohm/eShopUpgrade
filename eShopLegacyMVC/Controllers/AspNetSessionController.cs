@@ -1,5 +1,7 @@
-﻿using eShopLegacy.Models;
-using System.Web.Mvc;
+using eShopLegacy.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace eShopLegacyMVC.Controllers
 {
@@ -8,7 +10,12 @@ namespace eShopLegacyMVC.Controllers
         // GET: AspNetCoreSession
         public ActionResult Index()
         {
-            var model = HttpContext.Session["DemoItem"];
+            SessionDemoModel model = null;
+            var serializedModel = HttpContext.Session.GetString("DemoItem");
+            if (!string.IsNullOrEmpty(serializedModel))
+            {
+                model = JsonConvert.DeserializeObject<SessionDemoModel>(serializedModel);
+            }
             return View(model);
         }
 
@@ -17,7 +24,7 @@ namespace eShopLegacyMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Index(SessionDemoModel demoModel)
         {
-            HttpContext.Session["DemoItem"] = demoModel;
+            HttpContext.Session.SetString("DemoItem", JsonConvert.SerializeObject(demoModel));
             return View(demoModel);
         }
     }

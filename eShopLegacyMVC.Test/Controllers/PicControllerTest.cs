@@ -1,13 +1,17 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Web;
-using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using eShopLegacyMVC.Controllers;
 using eShopLegacyMVC.Models;
 using eShopLegacyMVC.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
+
+
 
 namespace eShopLegacyMVC.Test.Controllers
 {
@@ -16,9 +20,9 @@ namespace eShopLegacyMVC.Test.Controllers
     {
         private Mock<ICatalogService> _mockCatalogService;
         private PicController _controller;
-        private Mock<HttpServerUtilityBase> _mockServer;
-        private Mock<HttpContextBase> _mockHttpContext;
-        private Mock<HttpRequestBase> _mockHttpRequest;
+        private Mock<IWebHostEnvironment> _mockWebHostEnvironment;
+        private Mock<HttpContext> _mockHttpContext;
+        private Mock<IHttpContextAccessor> _mockHttpContextAccessor;
 
         [TestInitialize]
         public void Setup()
@@ -26,25 +30,24 @@ namespace eShopLegacyMVC.Test.Controllers
             // Setup mock services
             _mockCatalogService = new Mock<ICatalogService>();
             
-            // Setup mock HTTP context
-            _mockHttpContext = new Mock<HttpContextBase>();
-            _mockHttpRequest = new Mock<HttpRequestBase>();
-            _mockServer = new Mock<HttpServerUtilityBase>();
-              // Setup controller with HttpContext
-            _controller = new PicController(_mockCatalogService.Object);
-            _controller.ControllerContext = new ControllerContext(
+            // Setup mock services
+            _mockHttpContext = new Mock<HttpContext>();
+            _mockWebHostEnvironment = new Mock<IWebHostEnvironment>();
+            _mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+
+            // Configure HttpContextAccessor
+            _mockHttpContextAccessor.Setup(x => x.HttpContext).Returns(_mockHttpContext.Object);
+
+            // Setup controller
+            _controller = new PicController(_mockCatalogService.Object, _mockWebHostEnvironment.Object);
+
+            // Create a controller context
+            var actionContext = new ActionContext(
                 _mockHttpContext.Object,
-                new System.Web.Routing.RouteData(),
-                _controller);
-            
-            // Setup Server.MapPath - we need to set it through reflection since it's read-only
-            _mockHttpContext.Setup(c => c.Request).Returns(_mockHttpRequest.Object);
-            _mockHttpContext.Setup(c => c.Server).Returns(_mockServer.Object);
-            
-            // Set the controller's HttpContext instead of trying to set Server directly
-            var controllerContextType = typeof(ControllerContext);
-            var httpContextProperty = controllerContextType.GetProperty("HttpContext");
-            httpContextProperty.SetValue(_controller.ControllerContext, _mockHttpContext.Object);
+                new RouteData(),
+                new Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor());
+
+            _controller.ControllerContext = new ControllerContext(actionContext);
         }
 
         [TestMethod]
@@ -54,7 +57,7 @@ namespace eShopLegacyMVC.Test.Controllers
             int invalidId = 0;
 
             // Act
-            var result = _controller.Index(invalidId) as HttpStatusCodeResult;
+            var result = _controller.Index(invalidId) as StatusCodeResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -69,7 +72,7 @@ namespace eShopLegacyMVC.Test.Controllers
             _mockCatalogService.Setup(s => s.FindCatalogItem(nonExistingId)).Returns((CatalogItem)null);
 
             // Act
-            var result = _controller.Index(nonExistingId) as HttpNotFoundResult;
+            var result = _controller.Index(nonExistingId) as NotFoundResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -99,8 +102,9 @@ namespace eShopLegacyMVC.Test.Controllers
                 var catalogItem = new CatalogItem { Id = validId, Name = "Test Item", PictureFileName = testFileName };
                 _mockCatalogService.Setup(s => s.FindCatalogItem(validId)).Returns(catalogItem);
                 
-                // Setup Server.MapPath to return our test directory
-                _mockServer.Setup(s => s.MapPath(It.IsAny<string>())).Returns(webRoot);
+                // Setup WebHostEnvironment to return our test directory
+                _mockWebHostEnvironment.Setup(s => s.ContentRootPath).Returns(webRoot);
+                _mockWebHostEnvironment.Setup(s => s.WebRootPath).Returns(webRoot);
 
                 // Act
                 var result = _controller.Index(validId) as FileContentResult;

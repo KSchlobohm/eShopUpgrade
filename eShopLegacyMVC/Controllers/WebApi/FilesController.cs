@@ -1,14 +1,16 @@
-﻿using eShopLegacy.Utilities;
+using eShopLegacy.Utilities;
 using eShopLegacyMVC.Services;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace eShopLegacyMVC.Controllers.WebApi
 {
-    public class FilesController : ApiController
+    [ApiController]
+    [Route("api/[controller]")]
+    public class FilesController : ControllerBase
     {
         private ICatalogService _service;
 
@@ -17,8 +19,9 @@ namespace eShopLegacyMVC.Controllers.WebApi
             _service = service;
         }
 
-        // GET api/<controller>
-        public HttpResponseMessage Get()
+    // GET api/<controller>
+    [HttpGet]
+    public HttpResponseMessage Get()
         {
             var brands = _service.GetCatalogBrands()
                 .Select(b => new BrandDTO
