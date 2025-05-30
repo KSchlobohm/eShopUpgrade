@@ -30,14 +30,16 @@ namespace eShopLegacyMVC.Services
                 BasePath = ConfigurationManager.AppSettings["Files:BasePath"],
                 ServiceAccountUsername = ConfigurationManager.AppSettings["Files:ServiceAccountUsername"],
                 ServiceAccountDomain = ConfigurationManager.AppSettings["Files:ServiceAccountDomain"],
-                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"]
+                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"],
+                KeyVaultService = new KeyVaultService()
             });
 
         public IEnumerable<string> ListFiles()
         {
+            var serviceAccountPassword = GetServiceAccountPassword();
             var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
                 ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, serviceAccountPassword);
 
             using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
             {
@@ -47,9 +49,10 @@ namespace eShopLegacyMVC.Services
 
         public byte[] DownloadFile(string filename)
         {
+            var serviceAccountPassword = GetServiceAccountPassword();
             var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
                 ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, serviceAccountPassword);
 
             using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
             {
@@ -60,9 +63,10 @@ namespace eShopLegacyMVC.Services
 
         public void UploadFile(HttpFileCollectionBase files)
         {
+            var serviceAccountPassword = GetServiceAccountPassword();
             var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
                 ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, serviceAccountPassword);
 
             using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
             {
@@ -90,6 +94,30 @@ namespace eShopLegacyMVC.Services
             }
 
             return authToken;
+        }
+
+        private string GetServiceAccountPassword()
+        {
+            // First try to get from configuration (backward compatibility)
+            if (!string.IsNullOrEmpty(configuration.ServiceAccountPassword))
+            {
+                return configuration.ServiceAccountPassword;
+            }
+
+            // If no password in config and KeyVaultService is available, get from Key Vault
+            if (configuration.KeyVaultService != null)
+            {
+                try
+                {
+                    return configuration.KeyVaultService.GetSecret("files-service-account-password");
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("Failed to retrieve service account password from Key Vault", ex);
+                }
+            }
+
+            return string.Empty;
         }
     }
 }

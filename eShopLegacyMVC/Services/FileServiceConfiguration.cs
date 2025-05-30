@@ -6,5 +6,6 @@
         public string ServiceAccountDomain { get; set; }
         public string ServiceAccountUsername { get; set; }
         public string ServiceAccountPassword { get; set; }
+        public IKeyVaultService KeyVaultService { get; set; }
     }
 }

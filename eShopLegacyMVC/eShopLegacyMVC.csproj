@@ -265,9 +265,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CatalogService.cs" />
     <Compile Include="Services\CatalogServiceMock.cs" />
+    <Compile Include="Services\ConnectionStringService.cs" />
     <Compile Include="Services\FileService.cs" />
     <Compile Include="Services\FileServiceConfiguration.cs" />
     <Compile Include="Services\ICatalogService.cs" />
+    <Compile Include="Services\KeyVaultService.cs" />
     <Compile Include="Services\WeatherService.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration;
+using eShopLegacyMVC.Services;
 
 namespace eShopLegacyMVC.Models
 {
@@ -8,6 +9,17 @@ namespace eShopLegacyMVC.Models
     {
         public CatalogDBContext() : base("name=CatalogDBContext")
         {
+        }
+
+        public CatalogDBContext(string connectionString) : base(connectionString)
+        {
+        }
+
+        public static CatalogDBContext CreateWithKeyVault()
+        {
+            var connectionStringService = ConnectionStringService.Create();
+            var connectionString = connectionStringService.GetConnectionString("CatalogDBContext");
+            return new CatalogDBContext(connectionString);
         }
 
         public DbSet<CatalogItem> CatalogItems { get; set; }

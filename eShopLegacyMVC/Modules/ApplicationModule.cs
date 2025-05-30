@@ -15,6 +15,15 @@ namespace eShopLegacyMVC.Modules
         }
         protected override void Load(ContainerBuilder builder)
         {
+            // Register Key Vault services
+            builder.RegisterType<KeyVaultService>()
+                .As<IKeyVaultService>()
+                .SingleInstance();
+
+            builder.RegisterType<ConnectionStringService>()
+                .As<IConnectionStringService>()
+                .SingleInstance();
+
             if (this.useMockData)
             {
                 builder.RegisterType<CatalogServiceMock>()
@@ -36,6 +45,11 @@ namespace eShopLegacyMVC.Modules
 
             builder.RegisterType<CatalogItemHiLoGenerator>()
                 .SingleInstance();
+
+            // Register WeatherService with Key Vault support
+            builder.Register(c => WeatherService.Create())
+                .As<WeatherService>()
+                .InstancePerLifetimeScope();
         }
     }
 }

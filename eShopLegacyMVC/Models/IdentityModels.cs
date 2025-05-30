@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using eShopLegacyMVC.Services;
 
 namespace eShopLegacyMVC.Models
 {
@@ -50,9 +51,21 @@ namespace eShopLegacyMVC.Models
         {
         }
 
+        public ApplicationDbContext(string connectionString)
+            : base(connectionString, throwIfV1Schema: false)
+        {
+        }
+
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
+        }
+
+        public static ApplicationDbContext CreateWithKeyVault()
+        {
+            var connectionStringService = ConnectionStringService.Create();
+            var connectionString = connectionStringService.GetConnectionString("IdentityDBContext");
+            return new ApplicationDbContext(connectionString);
         }
     }
 }
