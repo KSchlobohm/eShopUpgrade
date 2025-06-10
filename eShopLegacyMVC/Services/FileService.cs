@@ -6,6 +6,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Web;
+using Azure.Identity;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 namespace eShopLegacyMVC.Services
 {
@@ -15,6 +18,7 @@ namespace eShopLegacyMVC.Services
         private const int LOGON32_LOGON_NEWCREDENTIALS = 9;
 
         private readonly FileServiceConfiguration configuration;
+        private readonly BlobContainerClient containerClient;
 
         [DllImport("advapi32.dll", SetLastError = true)]
         public static extern bool LogonUser(string lpszUsername, string lpszDomain, string lpszPassword, int dwLogonType, int dwLogonProvider, out IntPtr phToken);
@@ -22,61 +26,117 @@ namespace eShopLegacyMVC.Services
         public FileService(FileServiceConfiguration configuration)
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        }
-
-        public static FileService Create() =>
+            
+            if (configuration.UseCredentialBasedAuth && !string.IsNullOrEmpty(configuration.BlobStorageUri))
+            {
+                // Use DefaultAzureCredential for authentication (managed identity, environment variables, etc.)
+                var credential = new DefaultAzureCredential();
+                var blobServiceClient = new BlobServiceClient(new Uri(configuration.BlobStorageUri), credential);
+                containerClient = blobServiceClient.GetBlobContainerClient(configuration.BlobContainerName);
+                
+                // Create the container if it doesn't exist
+                containerClient.CreateIfNotExists(PublicAccessType.None);
+            }
+            else if (!string.IsNullOrEmpty(configuration.BlobStorageConnectionString))
+            {
+                var blobServiceClient = new BlobServiceClient(configuration.BlobStorageConnectionString);
+                containerClient = blobServiceClient.GetBlobContainerClient(configuration.BlobContainerName);
+                
+                // Create the container if it doesn't exist
+                containerClient.CreateIfNotExists(PublicAccessType.None);
+            }
+        }        public static FileService Create() =>
             new FileService(new FileServiceConfiguration
             {
                 BasePath = ConfigurationManager.AppSettings["Files:BasePath"],
                 ServiceAccountUsername = ConfigurationManager.AppSettings["Files:ServiceAccountUsername"],
                 ServiceAccountDomain = ConfigurationManager.AppSettings["Files:ServiceAccountDomain"],
-                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"]
+                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"],
+                BlobStorageConnectionString = ConfigurationManager.AppSettings["Files:BlobStorageConnectionString"],
+                BlobContainerName = ConfigurationManager.AppSettings["Files:BlobContainerName"],
+                BlobStorageUri = ConfigurationManager.AppSettings["Files:BlobStorageUri"],
+                UseCredentialBasedAuth = ConfigurationManager.AppSettings["Files:UseCredentialBasedAuth"] == "true"
             });
 
         public IEnumerable<string> ListFiles()
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
-
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            if (containerClient != null)
             {
-                return Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName);
+                var blobs = containerClient.GetBlobs();
+                return blobs.Select(b => b.Name).ToList();
+            }
+            else
+            {
+                var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
+                    ? WindowsIdentity.GetCurrent().Token
+                    : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+
+                using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+                {
+                    return Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName);
+                }
             }
         }
 
         public byte[] DownloadFile(string filename)
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
-
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            if (containerClient != null)
             {
-                var path = Path.Combine(configuration.BasePath, filename);
-                return File.ReadAllBytes(path);
+                var blobClient = containerClient.GetBlobClient(filename);
+                using (var memoryStream = new MemoryStream())
+                {
+                    blobClient.DownloadTo(memoryStream);
+                    return memoryStream.ToArray();
+                }
+            }
+            else
+            {
+                var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
+                    ? WindowsIdentity.GetCurrent().Token
+                    : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+
+                using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+                {
+                    var path = Path.Combine(configuration.BasePath, filename);
+                    return File.ReadAllBytes(path);
+                }
             }
         }
 
         public void UploadFile(HttpFileCollectionBase files)
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
-
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            if (containerClient != null)
             {
-
                 for (var i = 0; i < files.Count; i++)
                 {
                     var file = files[i];
                     var filename = Path.GetFileName(file.FileName);
-                    var path = Path.Combine(configuration.BasePath, filename);
+                    var blobClient = containerClient.GetBlobClient(filename);
 
-                    using (var fs = File.Create(path))
+                    using (var stream = file.InputStream)
                     {
-                        // TODO - Switch to CopyToAsync when upgrading to .NET 8
-                        file.InputStream.CopyTo(fs);
+                        blobClient.Upload(stream, true);
+                    }
+                }
+            }
+            else
+            {
+                var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
+                    ? WindowsIdentity.GetCurrent().Token
+                    : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
+
+                using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+                {
+                    for (var i = 0; i < files.Count; i++)
+                    {
+                        var file = files[i];
+                        var filename = Path.GetFileName(file.FileName);
+                        var path = Path.Combine(configuration.BasePath, filename);
+
+                        using (var fs = File.Create(path))
+                        {
+                            file.InputStream.CopyTo(fs);
+                        }
                     }
                 }
             }
