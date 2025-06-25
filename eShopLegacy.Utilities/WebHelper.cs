@@ -4,6 +4,6 @@ namespace eShopLegacy.Utilities
 {
     public class WebHelper
     {
-        public static string UserAgent => HttpContext.Current.Request.UserAgent;
+        public static string UserAgent => HttpContext.Current.Request.Headers["User-Agent"].ToString();
     }
 }
