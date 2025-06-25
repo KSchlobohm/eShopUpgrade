@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Integration.Mvc;
 using Autofac.Integration.WebApi;
+using eShopLegacy.Models;
 using eShopLegacyMVC.Models;
 using eShopLegacyMVC.Models.Infrastructure;
 using eShopLegacyMVC.Modules;
@@ -33,6 +34,21 @@ namespace eShopLegacyMVC
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             ConfigDataBase();
+
+            this.AddSystemWebAdapters()
+                .AddProxySupport(options => options.UseForwardedHeaders = true)
+                .AddJsonSessionSerializer(options =>
+                {
+                    options.RegisterKey<string>("MachineName");
+                    options.RegisterKey<DateTime>("SessionStartTime");
+                    options.RegisterKey<SessionDemoModel>("DemoItem");
+                })
+                .AddRemoteAppServer(options =>
+                {
+                    options.ApiKey = ConfigurationManager.AppSettings["RemoteAppApiKey"];
+                })
+                .AddSessionServer()
+                .AddAuthenticationServer();
         }
 
         /// <summary>

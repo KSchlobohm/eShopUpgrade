@@ -2,9 +2,11 @@
 using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.AspNetCore.SystemWebAdapters;
 
 namespace eShopLegacyMVC.Controllers
 {
+    [Session]
     public class DocumentsController : Controller
     {
         private readonly FileService fileService;
