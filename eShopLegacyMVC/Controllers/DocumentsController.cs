@@ -1,24 +1,35 @@
 ﻿using eShopLegacyMVC.Services;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace eShopLegacyMVC.Controllers
 {
     public class DocumentsController : Controller
     {
+        private readonly FileService _fileService;
+
+        public DocumentsController(FileService fileService)
+        {
+            _fileService = fileService;
+        }
+
         // GET: Files
         public ActionResult Index()
         {
-            var files = FileService.Create().ListFiles();
+            var files = _fileService.ListFiles();
             return View(files);
         }
 
-        [OutputCache(VaryByParam = "filename", Duration = int.MaxValue)]
+        [ResponseCache(Duration = int.MaxValue, VaryByQueryKeys = new[] { "filename" })]
         public FileResult Download(string filename)
         {
-            var fileService = FileService.Create();
-            var file = fileService.DownloadFile(filename);
-            FileContentResult fc = new FileContentResult(file, MimeMapping.GetMimeMapping(filename));
+            var file = _fileService.DownloadFile(filename);
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filename, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            FileContentResult fc = new FileContentResult(file, contentType);
             fc.FileDownloadName = filename;
             return fc;
         }
@@ -31,8 +42,7 @@ namespace eShopLegacyMVC.Controllers
         [HttpPost]
         public ActionResult UploadDocument()
         {
-            var fileService = FileService.Create();
-            fileService.UploadFile(Request.Files);
+            _fileService.UploadFile(Request.Form.Files);
             return RedirectToAction("Index");
         }
     }

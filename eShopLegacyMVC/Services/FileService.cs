@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Principal;
-using System.Web;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Win32.SafeHandles;
 
 namespace eShopLegacyMVC.Services
 {
+    [SupportedOSPlatform("windows")]
     public class FileService
     {
         private const int LOGON32_PROVIDER_DEFAULT = 0;
@@ -24,49 +26,26 @@ namespace eShopLegacyMVC.Services
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public static FileService Create() =>
-            new FileService(new FileServiceConfiguration
-            {
-                BasePath = ConfigurationManager.AppSettings["Files:BasePath"],
-                ServiceAccountUsername = ConfigurationManager.AppSettings["Files:ServiceAccountUsername"],
-                ServiceAccountDomain = ConfigurationManager.AppSettings["Files:ServiceAccountDomain"],
-                ServiceAccountPassword = ConfigurationManager.AppSettings["Files:ServiceAccountPassword"]
-            });
-
         public IEnumerable<string> ListFiles()
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
-
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
-            {
-                return Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName);
-            }
+            return RunImpersonated(() =>
+                Directory.GetFiles(configuration.BasePath).Select(Path.GetFileName).ToList()
+            );
         }
 
         public byte[] DownloadFile(string filename)
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
-
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            return RunImpersonated(() =>
             {
                 var path = Path.Combine(configuration.BasePath, filename);
                 return File.ReadAllBytes(path);
-            }
+            });
         }
 
-        public void UploadFile(HttpFileCollectionBase files)
+        public void UploadFile(IFormFileCollection files)
         {
-            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
-                ? WindowsIdentity.GetCurrent().Token
-                : GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword);
-
-            using (var impersonationContext = WindowsIdentity.Impersonate(authToken))
+            RunImpersonated(() =>
             {
-
                 for (var i = 0; i < files.Count; i++)
                 {
                     var file = files[i];
@@ -75,11 +54,28 @@ namespace eShopLegacyMVC.Services
 
                     using (var fs = File.Create(path))
                     {
-                        // TODO - Switch to CopyToAsync when upgrading to .NET 8
-                        file.InputStream.CopyTo(fs);
+                        file.CopyTo(fs);
                     }
                 }
-            }
+            });
+        }
+
+        private T RunImpersonated<T>(Func<T> action)
+        {
+            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
+                ? WindowsIdentity.GetCurrent().AccessToken
+                : new SafeAccessTokenHandle(GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword));
+
+            return WindowsIdentity.RunImpersonated(authToken, action);
+        }
+
+        private void RunImpersonated(Action action)
+        {
+            var authToken = string.IsNullOrEmpty(configuration.ServiceAccountUsername)
+                ? WindowsIdentity.GetCurrent().AccessToken
+                : new SafeAccessTokenHandle(GetAuthToken(configuration.ServiceAccountUsername, configuration.ServiceAccountDomain, configuration.ServiceAccountPassword));
+
+            WindowsIdentity.RunImpersonated(authToken, action);
         }
 
         private IntPtr GetAuthToken(string username, string domain, string password)
