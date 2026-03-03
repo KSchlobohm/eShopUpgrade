@@ -60,7 +60,7 @@
         {
           "id": "M0-T3",
           "title": "Document dependency graph",
-          "description": "Record the project dependency order: eShopLegacy.Common (no deps) â†’ eShopLegacy.Utilities (depends on Common) â†’ eShopLegacyMVC (depends on Common, Utilities) â†’ eShopLegacyMVC.Test (depends on Common, MVC).",
+          "description": "Record the project dependency order: eShopLegacy.Common (no deps) \u00e2\u2020\u2019 eShopLegacy.Utilities (depends on Common) \u00e2\u2020\u2019 eShopLegacyMVC (depends on Common, Utilities) \u00e2\u2020\u2019 eShopLegacyMVC.Test (depends on Common, MVC).",
           "assigned_to": "Keaton",
           "status": "not_started",
           "files_affected": [],
@@ -304,7 +304,7 @@
       "title": "Target Framework Update to .NET 10",
       "description": "Retarget all non-web projects from .NET Framework to net10.0. The library projects (Common, Utilities) must be retargeted first, then the test project. The web project (eShopLegacyMVC) will be handled in M5 as a side-by-side ASP.NET Core migration.",
       "order": 4,
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "M3"
       ],
@@ -333,7 +333,7 @@
         {
           "id": "M4-T2",
           "title": "Retarget eShopLegacy.Utilities to net10.0",
-          "description": "Change TargetFramework to net10.0. Replace System.Web.HttpContext.Current.Request.UserAgent in WebHelper.cs â€” this uses System.Web which is unavailable on .NET 10. Use systemweb-adapters or redesign to accept HttpContext via DI. The BinaryFormatter usage in Serializing.cs is also obsolete/disabled in .NET 5+ and must be replaced.",
+          "description": "Change TargetFramework to net10.0. Replace System.Web.HttpContext.Current.Request.UserAgent in WebHelper.cs \u00e2\u20ac\u201d this uses System.Web which is unavailable on .NET 10. Use systemweb-adapters or redesign to accept HttpContext via DI. The BinaryFormatter usage in Serializing.cs is also obsolete/disabled in .NET 5+ and must be replaced.",
           "assigned_to": "McManus",
           "status": "completed",
           "challenge_doc": "docs/migration/m4-utilities-systemweb-removal.md",
@@ -375,7 +375,7 @@
           "title": "Verify library retargeting",
           "description": "Build the retargeted library projects and verify they compile cleanly.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M4-T2",
@@ -391,7 +391,7 @@
       "title": "Web Project Migration to ASP.NET Core",
       "description": "Migrate eShopLegacyMVC from ASP.NET MVC 5 / Web API 2 to ASP.NET Core on .NET 10. This is the most complex milestone. Create a new ASP.NET Core project side-by-side, port controllers, services, models, views, and configuration. Use systemweb-adapters where helpful for incremental migration.",
       "order": 5,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M4"
       ],
@@ -404,7 +404,7 @@
           "title": "Create ASP.NET Core project structure",
           "description": "Replace the old-style eShopLegacyMVC.csproj with an SDK-style ASP.NET Core project targeting net10.0. Add Microsoft.NET.Sdk.Web SDK. Create Program.cs with WebApplication builder. Remove Global.asax, Global.asax.cs, and Startup.cs (OWIN). Configure Kestrel hosting.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m5-aspnet-core-project-setup.md",
           "files_affected": [
             "eShopLegacyMVC/eShopLegacyMVC.csproj",
@@ -424,9 +424,9 @@
         {
           "id": "M5-T2",
           "title": "Migrate MVC controllers to ASP.NET Core",
-          "description": "Port all controllers from System.Web.Mvc to Microsoft.AspNetCore.Mvc. Key changes: Controller base class (same name, different namespace), ActionResult types, HttpStatusCodeResult â†’ StatusCode(), HttpNotFound() â†’ NotFound(), Request.Url â†’ Request.GetDisplayUrl(). Port CatalogController, PicController, AspNetSessionController, DocumentsController, UserInfoController, AccountController. Replace Server.MapPath with IWebHostEnvironment.WebRootPath.",
+          "description": "Port all controllers from System.Web.Mvc to Microsoft.AspNetCore.Mvc. Key changes: Controller base class (same name, different namespace), ActionResult types, HttpStatusCodeResult \u00e2\u2020\u2019 StatusCode(), HttpNotFound() \u00e2\u2020\u2019 NotFound(), Request.Url \u00e2\u2020\u2019 Request.GetDisplayUrl(). Port CatalogController, PicController, AspNetSessionController, DocumentsController, UserInfoController, AccountController. Replace Server.MapPath with IWebHostEnvironment.WebRootPath.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m5-controller-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Controllers/CatalogController.cs",
@@ -449,7 +449,7 @@
           "title": "Migrate Web API controllers to ASP.NET Core",
           "description": "Port ApiController-based controllers (BrandsController, FilesController, Api/CatalogController2) to ASP.NET Core ControllerBase or Controller with [ApiController] attribute. Replace System.Web.Http with Microsoft.AspNetCore.Mvc. Replace IHttpActionResult with IActionResult. Remove System.Runtime.Remoting.Messaging reference from BrandsController.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m5-webapi-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Controllers/WebApi/BrandsController.cs",
@@ -469,7 +469,7 @@
           "title": "Migrate routing configuration",
           "description": "Replace RouteConfig.cs, WebApiConfig.cs, FilterConfig.cs, and BundleConfig.cs with ASP.NET Core equivalents. Configure endpoint routing in Program.cs. Map MVC routes and API routes. Replace System.Web.Optimization bundling with ASP.NET Core static file serving or LibMan/WebOptimizer.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m5-routing-and-middleware.md",
           "files_affected": [
             "eShopLegacyMVC/App_Start/RouteConfig.cs",
@@ -491,7 +491,7 @@
           "title": "Migrate Razor views",
           "description": "Port Razor views from ASP.NET MVC 5 to ASP.NET Core Razor. Key changes: Replace @Html.ActionLink with tag helpers, update _ViewImports.cshtml, replace @Scripts.Render and @Styles.Render bundle references, update _Layout.cshtml, update Views/Web.config (remove or replace with _ViewImports). Port all views in Catalog, Account, AspNetSession, Documents, UserInfo, Shared folders.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m5-razor-view-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Views/Web.config",
@@ -516,7 +516,7 @@
           "title": "Migrate FileService for ASP.NET Core",
           "description": "Replace HttpFileCollectionBase with IFormFileCollection in FileService.UploadFile. Replace ConfigurationManager.AppSettings usage with IConfiguration/IOptions pattern. The static Create() factory needs to become DI-based. MimeMapping.GetMimeMapping needs replacement with FileExtensionContentTypeProvider.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m5-file-service-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Services/FileService.cs",
@@ -536,7 +536,7 @@
           "title": "Migrate WeatherService",
           "description": "Replace WebClient (obsolete) with HttpClient in WeatherService.cs. Register HttpClient via IHttpClientFactory in DI. Replace Newtonsoft.Json with System.Text.Json or update Newtonsoft to 13.x.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC/Services/WeatherService.cs"
           ],
@@ -551,7 +551,7 @@
           "title": "Remove Application Insights legacy integration",
           "description": "Remove Microsoft.ApplicationInsights.Web and related packages that depend on System.Web. Replace with Microsoft.ApplicationInsights.AspNetCore or OpenTelemetry. Remove ApplicationInsights.config, TelemetryCorrelationHttpModule from web.config.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC/ApplicationInsights.config",
             "eShopLegacyMVC/eShopLegacyMVC.csproj",
@@ -568,7 +568,7 @@
           "title": "Verify web project builds",
           "description": "Full build of the web project targeting net10.0. Fix remaining compilation errors.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M5-T2",
@@ -589,7 +589,7 @@
       "title": "Entity Framework 6 to EF Core Migration",
       "description": "Migrate from Entity Framework 6 to Entity Framework Core. Port CatalogDBContext, model configurations, database initializer, and the HiLo sequence generator.",
       "order": 6,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M5"
       ],
@@ -602,7 +602,7 @@
           "title": "Migrate CatalogDBContext to EF Core",
           "description": "Replace System.Data.Entity with Microsoft.EntityFrameworkCore. Port OnModelCreating from EntityTypeConfiguration<T> to ModelBuilder fluent API. Replace DbModelBuilder with ModelBuilder. Replace HasRequired/WithMany with HasOne/WithMany. Replace HasDatabaseGeneratedOption with ValueGeneratedNever(). Update connection string handling to use ASP.NET Core configuration.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m6-ef-core-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Models/CatalogDBContext.cs",
@@ -619,7 +619,7 @@
           "title": "Migrate CatalogDBInitializer to EF Core",
           "description": "Replace CreateDatabaseIfNotExists<T> with EF Core migration or EnsureCreated pattern. Port Seed method to use IDbContextFactory or a custom seeder service. Replace HostingEnvironment.ApplicationPhysicalPath with IWebHostEnvironment. Replace Database.SqlQuery<T> with FromSqlRaw. Replace Database.ExecuteSqlCommand with ExecuteSqlRaw.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m6-ef-core-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Models/Infrastructure/CatalogDBInitializer.cs",
@@ -638,7 +638,7 @@
           "title": "Update CatalogService for EF Core",
           "description": "Update CatalogService.cs to use EF Core APIs. Replace db.Entry(x).State = EntityState.Modified with EF Core Update pattern. Ensure Include() calls use Microsoft.EntityFrameworkCore namespace.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC/Services/CatalogService.cs"
           ],
@@ -653,7 +653,7 @@
           "title": "Verify EF Core migration",
           "description": "Build and run the application to verify database operations work with EF Core.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M6-T2",
@@ -669,7 +669,7 @@
       "title": "Dependency Injection Migration",
       "description": "Migrate from Autofac to ASP.NET Core built-in DI (or Autofac on Core). Replace Autofac container registration, Module pattern, and MVC/WebAPI resolver integration with ASP.NET Core's IServiceCollection.",
       "order": 7,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M6"
       ],
@@ -682,7 +682,7 @@
           "title": "Replace Autofac with built-in DI",
           "description": "Remove Autofac, Autofac.Mvc5, Autofac.WebApi2 packages. Port ApplicationModule registrations to IServiceCollection in Program.cs. Register CatalogService/CatalogServiceMock as ICatalogService (conditional on UseMockData config). Register CatalogDBContext, CatalogDBInitializer, CatalogItemHiLoGenerator. Remove the Modules folder.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m7-di-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Modules/ApplicationModule.cs",
@@ -701,7 +701,7 @@
           "title": "Verify DI wiring",
           "description": "Build and verify that all controller constructors receive their dependencies correctly.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M7-T1"
@@ -716,7 +716,7 @@
       "title": "Identity Migration",
       "description": "Migrate from ASP.NET Identity v2 (with OWIN) to ASP.NET Core Identity. Replace IdentityModels, ApplicationUserManager, ApplicationSignInManager, and OWIN cookie authentication with ASP.NET Core Identity equivalents.",
       "order": 8,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M7"
       ],
@@ -729,7 +729,7 @@
           "title": "Migrate Identity models and configuration",
           "description": "Replace Microsoft.AspNet.Identity.Core/EntityFramework/Owin with Microsoft.AspNetCore.Identity.EntityFrameworkCore. Port ApplicationUser (keep ZipCode property, replace HttpWebRequest with HttpClient). Port ApplicationDbContext to extend IdentityDbContext<ApplicationUser> using EF Core. Remove IdentityConfig.cs (ApplicationUserManager/ApplicationSignInManager factory pattern) and configure Identity in Program.cs.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m8-identity-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Models/IdentityModels.cs",
@@ -750,7 +750,7 @@
           "title": "Migrate AccountController to ASP.NET Core Identity",
           "description": "Replace OWIN context access (HttpContext.GetOwinContext()) with injected SignInManager<ApplicationUser> and UserManager<ApplicationUser>. Replace SignInStatus enum with SignInResult. Replace AuthenticationManager.SignOut with SignInManager.SignOutAsync. Remove ChallengeResult inner class (use ASP.NET Core ChallengeResult).",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m8-identity-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Controllers/AccountController.cs"
@@ -768,7 +768,7 @@
           "title": "Remove OWIN packages and middleware",
           "description": "Remove Microsoft.Owin, Microsoft.Owin.Host.SystemWeb, Microsoft.Owin.Security, Microsoft.Owin.Security.Cookies, Microsoft.Owin.Security.OAuth, and Owin packages. Remove Startup.Auth.cs and the OWIN Startup.cs. Ensure all auth is configured in Program.cs.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC/eShopLegacyMVC.csproj",
             "eShopLegacyMVC/App_Start/Startup.Auth.cs",
@@ -785,7 +785,7 @@
           "title": "Verify Identity migration",
           "description": "Build and test login/register/logoff flow.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M8-T3"
@@ -800,7 +800,7 @@
       "title": "Configuration and Cleanup",
       "description": "Migrate from web.config/ConfigurationManager to appsettings.json/IConfiguration. Remove legacy ASP.NET patterns. Clean up remaining Framework-only references.",
       "order": 9,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M8"
       ],
@@ -813,7 +813,7 @@
           "title": "Create appsettings.json",
           "description": "Create appsettings.json with all settings from web.config <appSettings> and <connectionStrings>. Include: ConnectionStrings.CatalogDBContext, ConnectionStrings.IdentityDBContext, UseMockData, UseCustomizationData, Files:BasePath, Files:ServiceAccountId, weather:ApiKey, NewItemQueuePath.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m9-configuration-migration.md",
           "files_affected": [
             "eShopLegacyMVC/appsettings.json",
@@ -828,9 +828,9 @@
         {
           "id": "M9-T2",
           "title": "Replace ConfigurationManager.AppSettings usage",
-          "description": "Replace all ConfigurationManager.AppSettings[\"key\"] calls with IConfiguration injection. Affected files: CatalogController (NewItemQueuePath), CatalogDBInitializer (UseCustomizationData), Global.asax.cs (UseMockData) â€” already moved to Program.cs. FileService.Create() static factory â€” replace with DI.",
+          "description": "Replace all ConfigurationManager.AppSettings[\"key\"] calls with IConfiguration injection. Affected files: CatalogController (NewItemQueuePath), CatalogDBInitializer (UseCustomizationData), Global.asax.cs (UseMockData) \u00e2\u20ac\u201d already moved to Program.cs. FileService.Create() static factory \u00e2\u20ac\u201d replace with DI.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC/Controllers/CatalogController.cs",
             "eShopLegacyMVC/Models/Infrastructure/CatalogDBInitializer.cs",
@@ -845,9 +845,9 @@
         {
           "id": "M9-T3",
           "title": "Migrate Session handling",
-          "description": "Replace System.Web.HttpContext.Current.Session usage with ASP.NET Core ISession or systemweb-adapters session support. AspNetSessionController uses HttpContext.Session directly. Global.asax Session_Start stores MachineName and SessionStartTime â€” migrate to middleware or session initialization.",
+          "description": "Replace System.Web.HttpContext.Current.Session usage with ASP.NET Core ISession or systemweb-adapters session support. AspNetSessionController uses HttpContext.Session directly. Global.asax Session_Start stores MachineName and SessionStartTime \u00e2\u20ac\u201d migrate to middleware or session initialization.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m9-session-migration.md",
           "files_affected": [
             "eShopLegacyMVC/Controllers/AspNetSessionController.cs",
@@ -866,7 +866,7 @@
           "title": "Migrate logging from log4net",
           "description": "Replace log4net with Microsoft.Extensions.Logging (built-in) or keep log4net (it supports .NET Core). If keeping log4net, update configuration from log4Net.xml. Replace LogManager.GetLogger pattern with ILogger<T> injection. Remove LogicalThreadContext.Properties usage from Global.asax (ActivityIdHelper, WebRequestInfo).",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC/log4Net.xml",
             "eShopLegacyMVC/Controllers/CatalogController.cs",
@@ -884,7 +884,7 @@
           "title": "Remove legacy files and cleanup",
           "description": "Remove files no longer needed: Global.asax, Global.asax.cs (replaced by Program.cs), web.config (keep only if IIS hosting needed), Web.Debug.config, Web.Release.config, ApplicationInsights.config, packages.config, App_Start folder (contents migrated to Program.cs), Views/Web.config. Remove System.Runtime.Remoting.Messaging reference from BrandsController.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC/Global.asax",
             "eShopLegacyMVC/Global.asax.cs",
@@ -909,7 +909,7 @@
           "title": "Verify configuration migration",
           "description": "Build and verify all configuration loads correctly from appsettings.json.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M9-T5"

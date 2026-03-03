@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Web;
+using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using eShopLegacyMVC.Services;
@@ -103,30 +103,25 @@ namespace eShopLegacyMVC.Test.Services
 
             // Act & Assert
             Assert.ThrowsException<FileNotFoundException>(() => _service.DownloadFile(nonExistingFile));
-        }        [TestMethod]
-        public void UploadFile_WithHttpFilesCollection_DoesNotThrow()
+        }
+
+        [TestMethod]
+        public void UploadFile_WithFormFileCollection_DoesNotThrow()
         {
             // Arrange
-            var mockHttpFileCollection = new Mock<HttpFileCollectionBase>();
-            var mockHttpPostedFile = new Mock<HttpPostedFileBase>();
-            
-            mockHttpPostedFile.Setup(f => f.FileName).Returns("test.txt");
-            mockHttpPostedFile.Setup(f => f.InputStream).Returns(new MemoryStream(new byte[] { 0x01, 0x02, 0x03 }));
-            mockHttpFileCollection.Setup(f => f.Count).Returns(1);
-            mockHttpFileCollection.Setup(f => f[0]).Returns(mockHttpPostedFile.Object);
-            mockHttpFileCollection.Setup(f => f[It.IsAny<int>()]).Returns(mockHttpPostedFile.Object);
-            
+            var fileContent = new byte[] { 0x01, 0x02, 0x03 };
+            var mockFormFile = new Mock<IFormFile>();
+            mockFormFile.Setup(f => f.FileName).Returns("test.txt");
+            mockFormFile.Setup(f => f.CopyTo(It.IsAny<Stream>()))
+                .Callback<Stream>(s => new MemoryStream(fileContent).CopyTo(s));
+
+            var mockFormFileCollection = new Mock<IFormFileCollection>();
+            mockFormFileCollection.Setup(f => f.Count).Returns(1);
+            mockFormFileCollection.Setup(f => f[0]).Returns(mockFormFile.Object);
+
             // Act & Assert - should not throw any exceptions
-            try
-            {
-                _service.UploadFile(mockHttpFileCollection.Object);
-                // If we get here, the test passed
-                Assert.IsTrue(true);
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Expected no exception, but got: {ex.Message}");
-            }
+            _service.UploadFile(mockFormFileCollection.Object);
+            Assert.IsTrue(File.Exists(Path.Combine(_testBasePath, "test.txt")));
         }
     }
 }

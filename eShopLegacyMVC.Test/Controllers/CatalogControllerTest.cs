@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using eShopLegacyMVC.Controllers;
@@ -16,24 +16,25 @@ namespace eShopLegacyMVC.Test.Controllers
     public class CatalogControllerTest
     {
         private Mock<ICatalogService> _mockCatalogService;
+        private Mock<IConfiguration> _mockConfig;
         private CatalogController _controller;
 
         [TestInitialize]
         public void Setup()
         {
             _mockCatalogService = new Mock<ICatalogService>();
-            _controller = new CatalogController(_mockCatalogService.Object);
+            _mockConfig = new Mock<IConfiguration>();
+            _controller = new CatalogController(_mockCatalogService.Object, _mockConfig.Object);
         }
 
         [TestMethod]
         public void Details_WithNullId_ReturnsBadRequest()
         {
             // Act
-            var result = _controller.Details(null) as HttpStatusCodeResult;
+            var result = _controller.Details(null) as BadRequestResult;
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, result.StatusCode);
         }
 
         [TestMethod]
@@ -44,7 +45,7 @@ namespace eShopLegacyMVC.Test.Controllers
             _mockCatalogService.Setup(s => s.FindCatalogItem(invalidId)).Returns((CatalogItem)null);
 
             // Act
-            var result = _controller.Details(invalidId) as HttpNotFoundResult;
+            var result = _controller.Details(invalidId) as NotFoundResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -66,8 +67,8 @@ namespace eShopLegacyMVC.Test.Controllers
             Assert.IsNotNull(result);
             var model = result.Model as CatalogItem;
             Assert.IsNotNull(model);
-            Assert.IsNotNull(result.ViewBag.CatalogBrandId);
-            Assert.IsNotNull(result.ViewBag.CatalogTypeId);
+            Assert.IsNotNull(result.ViewData["CatalogBrandId"]);
+            Assert.IsNotNull(result.ViewData["CatalogTypeId"]);
         }
 
         [TestMethod]
@@ -90,19 +91,18 @@ namespace eShopLegacyMVC.Test.Controllers
             var model = result.Model as CatalogItem;
             Assert.IsNotNull(model);
             Assert.AreEqual(catalogItem.Id, model.Id);
-            Assert.IsNotNull(result.ViewBag.CatalogBrandId);
-            Assert.IsNotNull(result.ViewBag.CatalogTypeId);
+            Assert.IsNotNull(result.ViewData["CatalogBrandId"]);
+            Assert.IsNotNull(result.ViewData["CatalogTypeId"]);
         }
 
         [TestMethod]
         public void Edit_Get_WithNullId_ReturnsBadRequest()
         {
             // Act
-            var result = _controller.Edit((int?)null) as HttpStatusCodeResult;
+            var result = _controller.Edit((int?)null) as BadRequestResult;
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, result.StatusCode);
         }
 
         [TestMethod]
@@ -113,9 +113,10 @@ namespace eShopLegacyMVC.Test.Controllers
             _mockCatalogService.Setup(s => s.FindCatalogItem(invalidId)).Returns((CatalogItem)null);
 
             // Act
-            var result = _controller.Edit(invalidId) as HttpNotFoundResult;
+            var result = _controller.Edit(invalidId) as NotFoundResult;
 
-            // Assert            Assert.IsNotNull(result);
+            // Assert
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
@@ -126,11 +127,11 @@ namespace eShopLegacyMVC.Test.Controllers
             _mockCatalogService.Setup(s => s.UpdateCatalogItem(catalogItem)).Verifiable();
 
             // Act
-            var result = _controller.Edit(catalogItem) as RedirectToRouteResult;
+            var result = _controller.Edit(catalogItem) as RedirectToActionResult;
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("Index", result.RouteValues["action"]);
+            Assert.AreEqual("Index", result.ActionName);
             _mockCatalogService.Verify();
         }
 
@@ -138,11 +139,10 @@ namespace eShopLegacyMVC.Test.Controllers
         public void Delete_Get_WithNullId_ReturnsBadRequest()
         {
             // Act
-            var result = _controller.Delete(null) as HttpStatusCodeResult;
+            var result = _controller.Delete(null) as BadRequestResult;
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual((int)HttpStatusCode.BadRequest, result.StatusCode);
         }
 
         [TestMethod]
@@ -155,11 +155,11 @@ namespace eShopLegacyMVC.Test.Controllers
             _mockCatalogService.Setup(s => s.RemoveCatalogItem(catalogItem)).Verifiable();
 
             // Act
-            var result = _controller.DeleteConfirmed(validId) as RedirectToRouteResult;
+            var result = _controller.DeleteConfirmed(validId) as RedirectToActionResult;
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("Index", result.RouteValues["action"]);
+            Assert.AreEqual("Index", result.ActionName);
             _mockCatalogService.Verify();
         }
     }
