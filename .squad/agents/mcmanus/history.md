@@ -17,4 +17,11 @@
 
 📌 **Team update (2026-03-03T21:49:00Z):** Fenster completed comprehensive upgrade challenges research (32 blockers, 58 packages analyzed). Keaton created 12-milestone migration plan with 53 tasks. BinaryFormatter in Serializing.cs is hard blocker. Web project must migrate side-by-side as new ASP.NET Core project. Migration order: libraries → web → tests. — decided by Fenster & Keaton
 
+📌 **M1-T1 completed:** Converted eShopLegacy.Common from legacy .csproj to SDK-style format targeting net461. The `upgrade-assistant` tool (both via `dnx` and direct) crashed with `System.TypeInitializationException` in `Microsoft.Build.Shared.XMakeElements` — likely an MSBuild version mismatch. Performed manual conversion instead: replaced old-style csproj with `Microsoft.NET.Sdk`, added `PackageReference` for EntityFramework 6.0.0, kept explicit `Reference` for `System.ComponentModel.DataAnnotations`, set `GenerateAssemblyInfo=false` to preserve existing AssemblyInfo.cs. Removed `packages.config`, cleaned `bin`/`obj`. Full solution (all 4 projects) builds successfully. No code changes required.
+
+**Gotchas:**
+- The upgrade-assistant tool (v1.0.749-preview1) is incompatible with the installed MSBuild 17.14 — manual conversion was necessary.
+- SDK-style net461 projects automatically reference most framework assemblies, but `System.ComponentModel.DataAnnotations` still needs an explicit `<Reference>`.
+- `System.Web` using directives in CatalogBrand.cs and CatalogType.cs compile fine because net461 SDK-style projects resolve them through framework assembly references.
+
 <!-- Append entries below -->

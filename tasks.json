@@ -25,7 +25,7 @@
       "title": "Baseline Verification",
       "description": "Verify the current solution builds and tests pass on .NET Framework 4.7.2. Establish baseline before any migration work begins.",
       "order": 0,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [],
       "risk_level": "low",
       "estimated_effort": "30 minutes",
@@ -36,7 +36,7 @@
           "title": "Restore NuGet packages and build solution",
           "description": "Run nuget restore and msbuild to confirm the solution builds successfully in its current state.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC.sln"
           ],
@@ -49,20 +49,24 @@
           "title": "Run existing tests",
           "description": "Execute all MSTest tests in eShopLegacyMVC.Test to establish a passing baseline.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
-          "depends_on": ["M0-T1"],
+          "depends_on": [
+            "M0-T1"
+          ],
           "skills": [],
           "verification": "vstest.console eShopLegacyMVC.Test\\bin\\Debug\\eShopLegacyMVC.Test.dll reports all tests passed"
         },
         {
           "id": "M0-T3",
           "title": "Document dependency graph",
-          "description": "Record the project dependency order: eShopLegacy.Common (no deps) → eShopLegacy.Utilities (depends on Common) → eShopLegacyMVC (depends on Common, Utilities) → eShopLegacyMVC.Test (depends on Common, MVC).",
+          "description": "Record the project dependency order: eShopLegacy.Common (no deps) â†’ eShopLegacy.Utilities (depends on Common) â†’ eShopLegacyMVC (depends on Common, Utilities) â†’ eShopLegacyMVC.Test (depends on Common, MVC).",
           "assigned_to": "Keaton",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M0-T1"],
+          "depends_on": [
+            "M0-T1"
+          ],
           "skills": [],
           "verification": "Dependency graph documented and matches actual project references"
         }
@@ -74,7 +78,9 @@
       "description": "Convert all eligible non-web projects to SDK-style csproj format using dnx upgrade-assistant. Projects converted in topological order: Common first, then Utilities, then Test. Do NOT convert the web project. Do NOT change target frameworks.",
       "order": 1,
       "status": "not_started",
-      "depends_on": ["M0"],
+      "depends_on": [
+        "M0"
+      ],
       "risk_level": "medium",
       "estimated_effort": "2 hours",
       "verification": "All three non-web projects use SDK-style format. packages.config removed from converted projects. Solution builds successfully with msbuild.",
@@ -84,7 +90,7 @@
           "title": "Convert eShopLegacy.Common to SDK-style",
           "description": "Run dnx upgrade-assistant on eShopLegacy.Common.csproj. This project targets net461 and has EntityFramework 6.0.0 as its only NuGet dependency. Clean bin/obj after conversion. Verify PackageReferences preserved.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m1-sdk-style-conversion.md",
           "files_affected": [
             "eShopLegacy.Common/eShopLegacy.Common.csproj",
@@ -92,7 +98,9 @@
             "eShopLegacy.Common/Properties/AssemblyInfo.cs"
           ],
           "depends_on": [],
-          "skills": ["dotnet-sdk-upgrading"],
+          "skills": [
+            "dotnet-sdk-upgrading"
+          ],
           "verification": "eShopLegacy.Common.csproj has <Project Sdk=\"Microsoft.NET.Sdk\">. packages.config is gone. Build succeeds."
         },
         {
@@ -106,8 +114,12 @@
             "eShopLegacy.Utilities/eShopLegacy.Utilities.csproj",
             "eShopLegacy.Utilities/Properties/AssemblyInfo.cs"
           ],
-          "depends_on": ["M1-T1"],
-          "skills": ["dotnet-sdk-upgrading"],
+          "depends_on": [
+            "M1-T1"
+          ],
+          "skills": [
+            "dotnet-sdk-upgrading"
+          ],
           "verification": "eShopLegacy.Utilities.csproj is SDK-style. ProjectReference to Common preserved. Build succeeds."
         },
         {
@@ -122,8 +134,12 @@
             "eShopLegacyMVC.Test/packages.config",
             "eShopLegacyMVC.Test/Properties/AssemblyInfo.cs"
           ],
-          "depends_on": ["M1-T2"],
-          "skills": ["dotnet-sdk-upgrading"],
+          "depends_on": [
+            "M1-T2"
+          ],
+          "skills": [
+            "dotnet-sdk-upgrading"
+          ],
           "verification": "eShopLegacyMVC.Test.csproj is SDK-style. packages.config is gone. All PackageReferences preserved. Build succeeds."
         },
         {
@@ -133,7 +149,9 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M1-T3"],
+          "depends_on": [
+            "M1-T3"
+          ],
           "skills": [],
           "verification": "msbuild eShopLegacyMVC.sln /t:Rebuild succeeds. All tests pass."
         }
@@ -145,7 +163,9 @@
       "description": "Replace System.Messaging (MSMQ) with Experimental.System.Messaging NuGet package. Update namespace references from System.Messaging to Experimental.System.Messaging in all affected files.",
       "order": 2,
       "status": "not_started",
-      "depends_on": ["M1"],
+      "depends_on": [
+        "M1"
+      ],
       "risk_level": "medium",
       "estimated_effort": "1 hour",
       "verification": "No references to System.Messaging assembly remain. Experimental.System.Messaging package installed. CatalogController MSMQ code compiles. Solution builds.",
@@ -163,7 +183,9 @@
             "eShopLegacyMVC/Controllers/CatalogController.cs"
           ],
           "depends_on": [],
-          "skills": ["msmq-upgrading"],
+          "skills": [
+            "msmq-upgrading"
+          ],
           "verification": "grep -r 'System.Messaging' finds zero matches outside Experimental namespace. Build succeeds."
         },
         {
@@ -175,8 +197,12 @@
           "files_affected": [
             "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj"
           ],
-          "depends_on": ["M2-T1"],
-          "skills": ["msmq-upgrading"],
+          "depends_on": [
+            "M2-T1"
+          ],
+          "skills": [
+            "msmq-upgrading"
+          ],
           "verification": "No System.Messaging assembly reference in test project. Build succeeds."
         },
         {
@@ -186,7 +212,9 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M2-T2"],
+          "depends_on": [
+            "M2-T2"
+          ],
           "skills": [],
           "verification": "Full solution builds. All tests pass."
         }
@@ -198,7 +226,9 @@
       "description": "Update all NuGet packages to versions compatible with .NET 10. Replace Framework-only packages with .NET Core equivalents. This is a research-heavy milestone to identify compatible replacement versions.",
       "order": 3,
       "status": "not_started",
-      "depends_on": ["M2"],
+      "depends_on": [
+        "M2"
+      ],
       "risk_level": "high",
       "estimated_effort": "4 hours",
       "verification": "All NuGet packages resolve to .NET 10-compatible versions. No packages.config files remain in SDK-style projects. Solution builds.",
@@ -212,7 +242,9 @@
           "challenge_doc": "docs/migration/m3-nuget-package-updates.md",
           "files_affected": [],
           "depends_on": [],
-          "skills": ["dotnet-porting"],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "Package compatibility matrix documented with specific version numbers for each package"
         },
         {
@@ -224,7 +256,9 @@
           "files_affected": [
             "eShopLegacy.Common/eShopLegacy.Common.csproj"
           ],
-          "depends_on": ["M3-T1"],
+          "depends_on": [
+            "M3-T1"
+          ],
           "skills": [],
           "verification": "eShopLegacy.Common builds with updated EntityFramework package."
         },
@@ -237,7 +271,9 @@
           "files_affected": [
             "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj"
           ],
-          "depends_on": ["M3-T1"],
+          "depends_on": [
+            "M3-T1"
+          ],
           "skills": [],
           "verification": "Test project builds with updated packages."
         },
@@ -248,7 +284,10 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M3-T2", "M3-T3"],
+          "depends_on": [
+            "M3-T2",
+            "M3-T3"
+          ],
           "skills": [],
           "verification": "Solution builds. All tests pass."
         }
@@ -260,7 +299,9 @@
       "description": "Retarget all non-web projects from .NET Framework to net10.0. The library projects (Common, Utilities) must be retargeted first, then the test project. The web project (eShopLegacyMVC) will be handled in M5 as a side-by-side ASP.NET Core migration.",
       "order": 4,
       "status": "not_started",
-      "depends_on": ["M3"],
+      "depends_on": [
+        "M3"
+      ],
       "risk_level": "high",
       "estimated_effort": "4 hours",
       "verification": "eShopLegacy.Common, eShopLegacy.Utilities, and eShopLegacyMVC.Test all target net10.0 and build successfully.",
@@ -278,13 +319,15 @@
             "eShopLegacy.Common/Models/CatalogType.cs"
           ],
           "depends_on": [],
-          "skills": ["dotnet-porting"],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "eShopLegacy.Common targets net10.0 and builds successfully."
         },
         {
           "id": "M4-T2",
           "title": "Retarget eShopLegacy.Utilities to net10.0",
-          "description": "Change TargetFramework to net10.0. Replace System.Web.HttpContext.Current.Request.UserAgent in WebHelper.cs — this uses System.Web which is unavailable on .NET 10. Use systemweb-adapters or redesign to accept HttpContext via DI. The BinaryFormatter usage in Serializing.cs is also obsolete/disabled in .NET 5+ and must be replaced.",
+          "description": "Change TargetFramework to net10.0. Replace System.Web.HttpContext.Current.Request.UserAgent in WebHelper.cs â€” this uses System.Web which is unavailable on .NET 10. Use systemweb-adapters or redesign to accept HttpContext via DI. The BinaryFormatter usage in Serializing.cs is also obsolete/disabled in .NET 5+ and must be replaced.",
           "assigned_to": "McManus",
           "status": "not_started",
           "challenge_doc": "docs/migration/m4-utilities-systemweb-removal.md",
@@ -293,8 +336,13 @@
             "eShopLegacy.Utilities/WebHelper.cs",
             "eShopLegacy.Common/Utilities/Serializing.cs"
           ],
-          "depends_on": ["M4-T1"],
-          "skills": ["systemweb-adapters", "dotnet-porting"],
+          "depends_on": [
+            "M4-T1"
+          ],
+          "skills": [
+            "systemweb-adapters",
+            "dotnet-porting"
+          ],
           "verification": "eShopLegacy.Utilities targets net10.0 and builds. No System.Web direct references remain."
         },
         {
@@ -308,8 +356,12 @@
             "eShopLegacy.Common/Utilities/Serializing.cs",
             "eShopLegacyMVC/Controllers/WebApi/FilesController.cs"
           ],
-          "depends_on": ["M4-T1"],
-          "skills": ["dotnet-porting"],
+          "depends_on": [
+            "M4-T1"
+          ],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "Serializing.cs compiles without BinaryFormatter. FilesController uses new serialization. Tests pass."
         },
         {
@@ -319,7 +371,10 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M4-T2", "M4-T3"],
+          "depends_on": [
+            "M4-T2",
+            "M4-T3"
+          ],
           "skills": [],
           "verification": "Both library projects target net10.0 and build with zero errors."
         }
@@ -331,7 +386,9 @@
       "description": "Migrate eShopLegacyMVC from ASP.NET MVC 5 / Web API 2 to ASP.NET Core on .NET 10. This is the most complex milestone. Create a new ASP.NET Core project side-by-side, port controllers, services, models, views, and configuration. Use systemweb-adapters where helpful for incremental migration.",
       "order": 5,
       "status": "not_started",
-      "depends_on": ["M4"],
+      "depends_on": [
+        "M4"
+      ],
       "risk_level": "critical",
       "estimated_effort": "3 days",
       "verification": "Web project targets net10.0, uses ASP.NET Core hosting model, builds successfully, and responds to HTTP requests.",
@@ -352,13 +409,16 @@
             "eShopLegacyMVC/packages.config"
           ],
           "depends_on": [],
-          "skills": ["systemweb-adapters", "dotnet-porting"],
+          "skills": [
+            "systemweb-adapters",
+            "dotnet-porting"
+          ],
           "verification": "eShopLegacyMVC.csproj is SDK-style with Microsoft.NET.Sdk.Web. Program.cs exists with minimal host setup."
         },
         {
           "id": "M5-T2",
           "title": "Migrate MVC controllers to ASP.NET Core",
-          "description": "Port all controllers from System.Web.Mvc to Microsoft.AspNetCore.Mvc. Key changes: Controller base class (same name, different namespace), ActionResult types, HttpStatusCodeResult → StatusCode(), HttpNotFound() → NotFound(), Request.Url → Request.GetDisplayUrl(). Port CatalogController, PicController, AspNetSessionController, DocumentsController, UserInfoController, AccountController. Replace Server.MapPath with IWebHostEnvironment.WebRootPath.",
+          "description": "Port all controllers from System.Web.Mvc to Microsoft.AspNetCore.Mvc. Key changes: Controller base class (same name, different namespace), ActionResult types, HttpStatusCodeResult â†’ StatusCode(), HttpNotFound() â†’ NotFound(), Request.Url â†’ Request.GetDisplayUrl(). Port CatalogController, PicController, AspNetSessionController, DocumentsController, UserInfoController, AccountController. Replace Server.MapPath with IWebHostEnvironment.WebRootPath.",
           "assigned_to": "McManus",
           "status": "not_started",
           "challenge_doc": "docs/migration/m5-controller-migration.md",
@@ -370,8 +430,12 @@
             "eShopLegacyMVC/Controllers/UserInfoController.cs",
             "eShopLegacyMVC/Controllers/AccountController.cs"
           ],
-          "depends_on": ["M5-T1"],
-          "skills": ["systemweb-adapters"],
+          "depends_on": [
+            "M5-T1"
+          ],
+          "skills": [
+            "systemweb-adapters"
+          ],
           "verification": "All controllers compile against Microsoft.AspNetCore.Mvc. No System.Web.Mvc references remain."
         },
         {
@@ -386,8 +450,12 @@
             "eShopLegacyMVC/Controllers/WebApi/FilesController.cs",
             "eShopLegacyMVC/Controllers/Api/CatalogController.cs"
           ],
-          "depends_on": ["M5-T1"],
-          "skills": ["dotnet-porting"],
+          "depends_on": [
+            "M5-T1"
+          ],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "All Web API controllers compile. No System.Web.Http references remain."
         },
         {
@@ -404,8 +472,12 @@
             "eShopLegacyMVC/App_Start/BundleConfig.cs",
             "eShopLegacyMVC/Program.cs"
           ],
-          "depends_on": ["M5-T1"],
-          "skills": ["dotnet-porting"],
+          "depends_on": [
+            "M5-T1"
+          ],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "Routing configured in Program.cs. Old App_Start classes removed or replaced. Attribute routes work."
         },
         {
@@ -425,8 +497,12 @@
             "eShopLegacyMVC/Views/Documents/",
             "eShopLegacyMVC/Views/UserInfo/"
           ],
-          "depends_on": ["M5-T2"],
-          "skills": ["dotnet-porting"],
+          "depends_on": [
+            "M5-T2"
+          ],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "All views render without errors. _ViewImports.cshtml configures tag helpers."
         },
         {
@@ -441,8 +517,12 @@
             "eShopLegacyMVC/Services/FileServiceConfiguration.cs",
             "eShopLegacyMVC/Controllers/DocumentsController.cs"
           ],
-          "depends_on": ["M5-T2"],
-          "skills": ["dotnet-porting"],
+          "depends_on": [
+            "M5-T2"
+          ],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "FileService compiles without System.Web references. Upload/Download/List methods work."
         },
         {
@@ -454,7 +534,9 @@
           "files_affected": [
             "eShopLegacyMVC/Services/WeatherService.cs"
           ],
-          "depends_on": ["M5-T1"],
+          "depends_on": [
+            "M5-T1"
+          ],
           "skills": [],
           "verification": "WeatherService compiles with HttpClient. No WebClient references remain."
         },
@@ -469,7 +551,9 @@
             "eShopLegacyMVC/eShopLegacyMVC.csproj",
             "eShopLegacyMVC/Web.config"
           ],
-          "depends_on": ["M5-T1"],
+          "depends_on": [
+            "M5-T1"
+          ],
           "skills": [],
           "verification": "No legacy Application Insights packages remain. New telemetry configured or removed."
         },
@@ -480,7 +564,15 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M5-T2", "M5-T3", "M5-T4", "M5-T5", "M5-T6", "M5-T7", "M5-T8"],
+          "depends_on": [
+            "M5-T2",
+            "M5-T3",
+            "M5-T4",
+            "M5-T5",
+            "M5-T6",
+            "M5-T7",
+            "M5-T8"
+          ],
           "skills": [],
           "verification": "dotnet build eShopLegacyMVC succeeds with zero errors."
         }
@@ -492,7 +584,9 @@
       "description": "Migrate from Entity Framework 6 to Entity Framework Core. Port CatalogDBContext, model configurations, database initializer, and the HiLo sequence generator.",
       "order": 6,
       "status": "not_started",
-      "depends_on": ["M5"],
+      "depends_on": [
+        "M5"
+      ],
       "risk_level": "high",
       "estimated_effort": "1 day",
       "verification": "All EF6 references removed. EF Core DbContext configured. Data access layer compiles and queries work.",
@@ -509,7 +603,9 @@
             "eShopLegacyMVC/eShopLegacyMVC.csproj"
           ],
           "depends_on": [],
-          "skills": ["dotnet-porting"],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "CatalogDBContext extends Microsoft.EntityFrameworkCore.DbContext. OnModelCreating uses EF Core fluent API."
         },
         {
@@ -523,8 +619,12 @@
             "eShopLegacyMVC/Models/Infrastructure/CatalogDBInitializer.cs",
             "eShopLegacyMVC/Models/CatalogItemHiLoGenerator.cs"
           ],
-          "depends_on": ["M6-T1"],
-          "skills": ["dotnet-porting"],
+          "depends_on": [
+            "M6-T1"
+          ],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "Database initialization compiles with EF Core APIs. HiLo generator uses FromSqlRaw."
         },
         {
@@ -536,7 +636,9 @@
           "files_affected": [
             "eShopLegacyMVC/Services/CatalogService.cs"
           ],
-          "depends_on": ["M6-T1"],
+          "depends_on": [
+            "M6-T1"
+          ],
           "skills": [],
           "verification": "CatalogService compiles with EF Core. CRUD operations use correct EF Core patterns."
         },
@@ -547,7 +649,10 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M6-T2", "M6-T3"],
+          "depends_on": [
+            "M6-T2",
+            "M6-T3"
+          ],
           "skills": [],
           "verification": "Application connects to database. CRUD operations on Catalog items succeed."
         }
@@ -559,7 +664,9 @@
       "description": "Migrate from Autofac to ASP.NET Core built-in DI (or Autofac on Core). Replace Autofac container registration, Module pattern, and MVC/WebAPI resolver integration with ASP.NET Core's IServiceCollection.",
       "order": 7,
       "status": "not_started",
-      "depends_on": ["M6"],
+      "depends_on": [
+        "M6"
+      ],
       "risk_level": "medium",
       "estimated_effort": "2 hours",
       "verification": "No Autofac references remain (or Autofac upgraded to Core-compatible version). All services registered in DI. Controllers receive dependencies via constructor injection.",
@@ -578,7 +685,9 @@
             "eShopLegacyMVC/eShopLegacyMVC.csproj"
           ],
           "depends_on": [],
-          "skills": ["dotnet-porting"],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "No Autofac packages in csproj. Services registered via builder.Services. Controllers resolve dependencies."
         },
         {
@@ -588,7 +697,9 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M7-T1"],
+          "depends_on": [
+            "M7-T1"
+          ],
           "skills": [],
           "verification": "Application starts without DI resolution errors. All endpoints respond."
         }
@@ -600,7 +711,9 @@
       "description": "Migrate from ASP.NET Identity v2 (with OWIN) to ASP.NET Core Identity. Replace IdentityModels, ApplicationUserManager, ApplicationSignInManager, and OWIN cookie authentication with ASP.NET Core Identity equivalents.",
       "order": 8,
       "status": "not_started",
-      "depends_on": ["M7"],
+      "depends_on": [
+        "M7"
+      ],
       "risk_level": "high",
       "estimated_effort": "1 day",
       "verification": "ASP.NET Core Identity configured. Login/Register/LogOff work. No OWIN or Microsoft.AspNet.Identity references remain.",
@@ -621,7 +734,9 @@
             "eShopLegacyMVC/eShopLegacyMVC.csproj"
           ],
           "depends_on": [],
-          "skills": ["dotnet-porting"],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "Identity services registered in DI. ApplicationUser works with EF Core."
         },
         {
@@ -634,8 +749,12 @@
           "files_affected": [
             "eShopLegacyMVC/Controllers/AccountController.cs"
           ],
-          "depends_on": ["M8-T1"],
-          "skills": ["dotnet-porting"],
+          "depends_on": [
+            "M8-T1"
+          ],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "AccountController compiles with ASP.NET Core Identity. No OWIN references remain."
         },
         {
@@ -649,7 +768,9 @@
             "eShopLegacyMVC/App_Start/Startup.Auth.cs",
             "eShopLegacyMVC/Startup.cs"
           ],
-          "depends_on": ["M8-T2"],
+          "depends_on": [
+            "M8-T2"
+          ],
           "skills": [],
           "verification": "No OWIN packages in csproj. No OWIN startup attributes or classes remain."
         },
@@ -660,7 +781,9 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M8-T3"],
+          "depends_on": [
+            "M8-T3"
+          ],
           "skills": [],
           "verification": "Application builds. Login, Register, LogOff endpoints respond correctly."
         }
@@ -672,7 +795,9 @@
       "description": "Migrate from web.config/ConfigurationManager to appsettings.json/IConfiguration. Remove legacy ASP.NET patterns. Clean up remaining Framework-only references.",
       "order": 9,
       "status": "not_started",
-      "depends_on": ["M8"],
+      "depends_on": [
+        "M8"
+      ],
       "risk_level": "medium",
       "estimated_effort": "3 hours",
       "verification": "No web.config used for app settings (only for IIS backward compat if needed). appsettings.json contains all configuration. No ConfigurationManager.AppSettings references remain.",
@@ -689,13 +814,15 @@
             "eShopLegacyMVC/appsettings.Development.json"
           ],
           "depends_on": [],
-          "skills": ["dotnet-porting"],
+          "skills": [
+            "dotnet-porting"
+          ],
           "verification": "appsettings.json exists with all required settings."
         },
         {
           "id": "M9-T2",
           "title": "Replace ConfigurationManager.AppSettings usage",
-          "description": "Replace all ConfigurationManager.AppSettings[\"key\"] calls with IConfiguration injection. Affected files: CatalogController (NewItemQueuePath), CatalogDBInitializer (UseCustomizationData), Global.asax.cs (UseMockData) — already moved to Program.cs. FileService.Create() static factory — replace with DI.",
+          "description": "Replace all ConfigurationManager.AppSettings[\"key\"] calls with IConfiguration injection. Affected files: CatalogController (NewItemQueuePath), CatalogDBInitializer (UseCustomizationData), Global.asax.cs (UseMockData) â€” already moved to Program.cs. FileService.Create() static factory â€” replace with DI.",
           "assigned_to": "McManus",
           "status": "not_started",
           "files_affected": [
@@ -703,14 +830,16 @@
             "eShopLegacyMVC/Models/Infrastructure/CatalogDBInitializer.cs",
             "eShopLegacyMVC/Services/FileService.cs"
           ],
-          "depends_on": ["M9-T1"],
+          "depends_on": [
+            "M9-T1"
+          ],
           "skills": [],
           "verification": "No ConfigurationManager references remain in any source file."
         },
         {
           "id": "M9-T3",
           "title": "Migrate Session handling",
-          "description": "Replace System.Web.HttpContext.Current.Session usage with ASP.NET Core ISession or systemweb-adapters session support. AspNetSessionController uses HttpContext.Session directly. Global.asax Session_Start stores MachineName and SessionStartTime — migrate to middleware or session initialization.",
+          "description": "Replace System.Web.HttpContext.Current.Session usage with ASP.NET Core ISession or systemweb-adapters session support. AspNetSessionController uses HttpContext.Session directly. Global.asax Session_Start stores MachineName and SessionStartTime â€” migrate to middleware or session initialization.",
           "assigned_to": "McManus",
           "status": "not_started",
           "challenge_doc": "docs/migration/m9-session-migration.md",
@@ -718,8 +847,12 @@
             "eShopLegacyMVC/Controllers/AspNetSessionController.cs",
             "eShopLegacyMVC/Program.cs"
           ],
-          "depends_on": ["M9-T1"],
-          "skills": ["systemweb-adapters"],
+          "depends_on": [
+            "M9-T1"
+          ],
+          "skills": [
+            "systemweb-adapters"
+          ],
           "verification": "Session reads/writes work in ASP.NET Core. No HttpContext.Current.Session references remain."
         },
         {
@@ -734,7 +867,9 @@
             "eShopLegacyMVC/Controllers/PicController.cs",
             "eShopLegacyMVC/Global.asax.cs"
           ],
-          "depends_on": ["M9-T1"],
+          "depends_on": [
+            "M9-T1"
+          ],
           "skills": [],
           "verification": "Logging works with ILogger or updated log4net. No LogicalThreadContext references remain."
         },
@@ -755,7 +890,11 @@
             "eShopLegacyMVC/App_Start/",
             "eShopLegacyMVC/Views/Web.config"
           ],
-          "depends_on": ["M9-T2", "M9-T3", "M9-T4"],
+          "depends_on": [
+            "M9-T2",
+            "M9-T3",
+            "M9-T4"
+          ],
           "skills": [],
           "verification": "No legacy ASP.NET files remain. Solution structure is clean ASP.NET Core."
         },
@@ -766,7 +905,9 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M9-T5"],
+          "depends_on": [
+            "M9-T5"
+          ],
           "skills": [],
           "verification": "Application starts and reads all config values. No ConfigurationManager usage."
         }
@@ -778,7 +919,9 @@
       "description": "Retarget eShopLegacyMVC.Test to net10.0. Update test framework, mocks, and assertions. Fix tests broken by the ASP.NET Core migration (different base types, HttpContext mocking changes).",
       "order": 10,
       "status": "not_started",
-      "depends_on": ["M9"],
+      "depends_on": [
+        "M9"
+      ],
       "risk_level": "medium",
       "estimated_effort": "4 hours",
       "verification": "All tests compile and pass on .NET 10. Test project targets net10.0.",
@@ -806,7 +949,9 @@
           "files_affected": [
             "eShopLegacyMVC.Test/Controllers/CatalogControllerTest.cs"
           ],
-          "depends_on": ["M10-T1"],
+          "depends_on": [
+            "M10-T1"
+          ],
           "skills": [],
           "verification": "CatalogControllerTest compiles and all tests pass."
         },
@@ -819,7 +964,9 @@
           "files_affected": [
             "eShopLegacyMVC.Test/Controllers/PicControllerTest.cs"
           ],
-          "depends_on": ["M10-T1"],
+          "depends_on": [
+            "M10-T1"
+          ],
           "skills": [],
           "verification": "PicControllerTest compiles and all tests pass."
         },
@@ -832,7 +979,9 @@
           "files_affected": [
             "eShopLegacyMVC.Test/Services/FileServiceTest.cs"
           ],
-          "depends_on": ["M10-T1"],
+          "depends_on": [
+            "M10-T1"
+          ],
           "skills": [],
           "verification": "FileServiceTest compiles and all tests pass."
         },
@@ -846,7 +995,9 @@
             "eShopLegacyMVC.Test/Models/CatalogDBContextTest.cs",
             "eShopLegacyMVC.Test/DbSetExtensions.cs"
           ],
-          "depends_on": ["M10-T1"],
+          "depends_on": [
+            "M10-T1"
+          ],
           "skills": [],
           "verification": "CatalogDBContextTest compiles and all tests pass."
         },
@@ -857,7 +1008,12 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M10-T2", "M10-T3", "M10-T4", "M10-T5"],
+          "depends_on": [
+            "M10-T2",
+            "M10-T3",
+            "M10-T4",
+            "M10-T5"
+          ],
           "skills": [],
           "verification": "dotnet test reports all tests passed with zero failures."
         }
@@ -869,7 +1025,9 @@
       "description": "Final end-to-end verification that the fully migrated solution meets all done criteria: zero warnings, zero errors, app starts and responds to requests.",
       "order": 11,
       "status": "not_started",
-      "depends_on": ["M10"],
+      "depends_on": [
+        "M10"
+      ],
       "risk_level": "low",
       "estimated_effort": "1 hour",
       "verification": "dotnet build with TreatWarningsAsErrors produces zero warnings. dotnet run starts the app. HTTP GET to / returns 200.",
@@ -892,7 +1050,9 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M11-T1"],
+          "depends_on": [
+            "M11-T1"
+          ],
           "skills": [],
           "verification": "App starts. HTTP GET to / returns 200 OK with the catalog page."
         },
@@ -903,7 +1063,9 @@
           "assigned_to": "Hockney",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M11-T1"],
+          "depends_on": [
+            "M11-T1"
+          ],
           "skills": [],
           "verification": "dotnet test reports all tests passed."
         },
@@ -914,7 +1076,10 @@
           "assigned_to": "Keaton",
           "status": "not_started",
           "files_affected": [],
-          "depends_on": ["M11-T2", "M11-T3"],
+          "depends_on": [
+            "M11-T2",
+            "M11-T3"
+          ],
           "skills": [],
           "verification": "Architecture review checklist passes. Migration declared complete."
         }
