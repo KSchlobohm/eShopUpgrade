@@ -25,3 +25,5 @@
 - `System.Web` using directives in CatalogBrand.cs and CatalogType.cs compile fine because net461 SDK-style projects resolve them through framework assembly references.
 
 <!-- Append entries below -->
+
+📌 Team update (2026-03-03T22:07): Hockney completed M0 baseline verification — Build succeeded with 0 warnings, 0 errors. All 31 MSTest tests pass. Baseline report written to docs/migration/m0-baseline-report.md. Key note: nuget.exe restore required (not dotnet restore) for packages.config projects. Environment: VS2022 Enterprise MSBuild 17.14.40, vstest.console 18.3.0. — decided by Hockney

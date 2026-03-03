@@ -16,4 +16,8 @@
 
 📌 **Team update (2026-03-03T21:49:00Z):** Fenster completed comprehensive upgrade challenges research (32 blockers, 58 packages analyzed). Keaton created 12-milestone migration plan with 53 tasks. Test project needs significant mock rewrites for System.Web → ASP.NET Core. M10 (test retarget) is planned with detailed guidance. — decided by Fenster & Keaton
 
+📌 **M0 Baseline Verification (2026-03-03):** Build succeeded with 0 warnings, 0 errors in both Debug and Release. All 31 MSTest tests pass (0 failures, 0 skips). Key environment note: `dotnet restore` does NOT work for packages.config projects — must use `nuget.exe restore`. MSBuild path: VS2022 Enterprise. vstest.console path: VS 18 Enterprise. 62 NuGet packages restored. Baseline report written to `docs/migration/m0-baseline-report.md`. M0-T1 and M0-T2 marked completed in tasks.json.
+
 <!-- Append entries below -->
+
+📌 Team update (2026-03-03T22:07): McManus completed M1-T1 — manual SDK-style conversion of eShopLegacy.Common targeting net461. upgrade-assistant incompatible with MSBuild 17.14; manual conversion applied. EntityFramework 6.0.0 migrated to PackageReference. Full solution builds successfully. Same pattern to be used for M1-T2 (Utilities) and M1-T3 (Test). — decided by McManus
