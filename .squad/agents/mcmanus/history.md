@@ -48,3 +48,10 @@
 - Experimental.System.Messaging v1.2.0 targets net8.0 ONLY — it is NOT compatible with net472. Must use v1.1.0 (targets netstandard2.0) for .NET Framework 4.7.2 projects.
 - Since eShopLegacyMVC is a legacy (non-SDK-style) csproj with packages.config, the package had to be installed manually: downloaded via temp SDK-style project, copied DLL to packages folder, added HintPath reference in csproj, and added entry to packages.config.
 - The test project (eShopLegacyMVC.Test) still has a `<Reference Include="System.Messaging" />` — that's M2-T2, a separate task.
+
+📌 **M2-T2 completed:** Replaced System.Messaging with Experimental.System.Messaging v1.1.0 in eShopLegacyMVC.Test. Removed `<Reference Include="System.Messaging" />` from the test csproj and added `<PackageReference Include="Experimental.System.Messaging" Version="1.1.0" />`. No test source files directly reference System.Messaging types — the reference was only needed for transitive resolution from the eShopLegacyMVC project reference. No using statement changes required. Full solution (all 4 projects) builds successfully. All 31 tests pass.
+
+**Gotchas:**
+- No test source files in eShopLegacyMVC.Test use `System.Messaging` or `Experimental.System.Messaging` directly — the assembly reference existed solely for transitive type resolution from the web project.
+- Since the test project is SDK-style, adding Experimental.System.Messaging as a `<PackageReference>` is straightforward (no manual DLL download needed, unlike the legacy web project in M2-T1).
+- v1.1.0 (netstandard2.0) is required; v1.2.0 targets net8.0 only and won't work with net472.

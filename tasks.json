@@ -193,7 +193,7 @@
           "title": "Replace System.Messaging in test project",
           "description": "Remove System.Messaging assembly reference from eShopLegacyMVC.Test.csproj. Add Experimental.System.Messaging package if test code references MSMQ types.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "done",
           "files_affected": [
             "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj"
           ],
