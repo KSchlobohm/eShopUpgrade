@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Migration Tasks",
+  "description": "Milestone-driven migration plan for .NET Framework 4.7.2 to .NET 10 upgrade",
+  "type": "object",
+  "required": ["project", "done_criteria", "milestones"],
+  "properties": {
+    "project": {
+      "type": "object",
+      "description": "Project metadata",
+      "required": ["name", "source_framework", "target_framework", "solution_file"],
+      "properties": {
+        "name": { "type": "string", "description": "Project name" },
+        "source_framework": { "type": "string", "description": "Current .NET Framework version" },
+        "target_framework": { "type": "string", "description": "Target .NET version" },
+        "solution_file": { "type": "string", "description": "Path to the solution file" },
+        "repository": { "type": "string", "description": "Repository URL or path" },
+        "owner": { "type": "string", "description": "Project owner" }
+      }
+    },
+    "done_criteria": {
+      "type": "object",
+      "description": "Overall completion criteria for the migration",
+      "required": ["description", "checks"],
+      "properties": {
+        "description": { "type": "string" },
+        "checks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of specific checks that must pass"
+        }
+      }
+    },
+    "milestones": {
+      "type": "array",
+      "description": "Ordered list of migration milestones",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "description", "order", "status", "tasks"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^M[0-9]+$",
+            "description": "Unique milestone identifier (e.g., M0, M1)"
+          },
+          "title": { "type": "string", "description": "Short milestone title" },
+          "description": { "type": "string", "description": "What this milestone achieves" },
+          "order": { "type": "integer", "minimum": 0, "description": "Execution order" },
+          "status": {
+            "type": "string",
+            "enum": ["not_started", "in_progress", "completed", "blocked"],
+            "default": "not_started"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Milestone IDs that must complete before this one starts"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Risk assessment for this milestone"
+          },
+          "estimated_effort": {
+            "type": "string",
+            "description": "Rough effort estimate (e.g., '2 hours', '1 day')"
+          },
+          "verification": {
+            "type": "string",
+            "description": "How to verify this milestone is complete"
+          },
+          "tasks": {
+            "type": "array",
+            "description": "Tasks within this milestone",
+            "items": {
+              "type": "object",
+              "required": ["id", "title", "description", "assigned_to", "status"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique task identifier (e.g., M1-T1)"
+                },
+                "title": { "type": "string", "description": "Short task title" },
+                "description": { "type": "string", "description": "What this task does" },
+                "assigned_to": {
+                  "type": "string",
+                  "description": "Team member assigned (McManus, Fenster, Hockney, Keaton)"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["not_started", "in_progress", "completed", "blocked", "skipped"],
+                  "default": "not_started"
+                },
+                "challenge_doc": {
+                  "type": "string",
+                  "description": "Path to markdown file with detailed challenge description"
+                },
+                "files_affected": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Source files that will be modified"
+                },
+                "depends_on": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Task IDs that must complete before this one"
+                },
+                "skills": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Squad skill references (.squad/skills/)"
+                },
+                "verification": {
+                  "type": "string",
+                  "description": "How to verify this task is complete"
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "Additional context or warnings"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

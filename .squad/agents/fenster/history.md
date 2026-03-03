@@ -18,3 +18,16 @@
 ## Learnings
 
 <!-- Append entries below -->
+
+### 2025-06-30: Comprehensive Upgrade Challenge Research
+- **32 distinct challenges identified** across the solution (6 blockers, 19 needs-work, 7 straightforward)
+- **Blockers:** ASP.NET MVC 5 (15+ files), Web API 2 (4 files), OWIN/Katana (3 files), ASP.NET Identity v2 (5 files), System.Web pervasive (20+ files), Global.asax lifecycle, BinaryFormatter (`eShopLegacy.Common/Utilities/Serializing.cs`)
+- **BinaryFormatter is removed in .NET 9+** — hard blocker for `Serializing.cs` and `FilesController.cs`
+- **58 NuGet packages analyzed:** 28 remove, 10 replace, 10 update, 5 client-side keep, 5 review
+- **Dependency graph:** Common → Utilities → MVC → Test (bottom-up migration order)
+- **eShopLegacyMVC is NOT eligible for SDK-style conversion tool** — must be side-by-side migration
+- **Auth stack (Identity + OWIN + MVC5)** is the most tightly coupled area — all three must migrate together
+- **`ApplicationUser.ZipCode`** makes synchronous HttpWebRequest in property getter — design smell
+- **`System.Runtime.Remoting.Messaging`** imported in `BrandsController.cs` — not available in .NET Core
+- **Session state** stores objects directly — ASP.NET Core requires byte serialization
+- **Full report:** `.squad/research/upgrade-challenges.md`

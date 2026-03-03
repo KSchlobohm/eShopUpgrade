@@ -14,4 +14,6 @@
 
 ## Learnings
 
+📌 **Team update (2026-03-03T21:49:00Z):** Fenster completed comprehensive upgrade challenges research (32 blockers, 58 packages analyzed). Keaton created 12-milestone migration plan with 53 tasks. Test project needs significant mock rewrites for System.Web → ASP.NET Core. M10 (test retarget) is planned with detailed guidance. — decided by Fenster & Keaton
+
 <!-- Append entries below -->
