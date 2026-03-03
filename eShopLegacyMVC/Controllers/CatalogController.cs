@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
-using System.Messaging;
+using Experimental.System.Messaging;
 using System.Net;
 using System.Web.Mvc;
 using eShopLegacyMVC.Models;

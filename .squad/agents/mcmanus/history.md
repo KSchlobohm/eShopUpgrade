@@ -41,3 +41,10 @@
 - EntityFramework 6.2.0 was in the old csproj as a direct assembly reference but NOT in packages.config — added it as PackageReference since test code directly uses EF types (CatalogDBContextTest.cs, DbSetExtensions.cs).
 - The app.config binding redirect for System.Threading.Tasks.Extensions needed updating from version 4.2.0.0 to 4.2.0.1 to match the NuGet package version 4.5.4.
 - `Microsoft.NET.Test.Sdk` was added (not in original project) to enable SDK-style test discovery with `dotnet test`.
+
+📌 **M2-T1 completed:** Replaced System.Messaging with Experimental.System.Messaging v1.1.0 in eShopLegacyMVC. Removed `<Reference Include="System.Messaging" />` from eShopLegacyMVC.csproj, added Experimental.System.Messaging assembly reference with HintPath to packages folder, added entry to packages.config. Updated `using System.Messaging;` to `using Experimental.System.Messaging;` in CatalogController.cs. Full solution (all 4 projects) builds successfully.
+
+**Gotchas:**
+- Experimental.System.Messaging v1.2.0 targets net8.0 ONLY — it is NOT compatible with net472. Must use v1.1.0 (targets netstandard2.0) for .NET Framework 4.7.2 projects.
+- Since eShopLegacyMVC is a legacy (non-SDK-style) csproj with packages.config, the package had to be installed manually: downloaded via temp SDK-style project, copied DLL to packages folder, added HintPath reference in csproj, and added entry to packages.config.
+- The test project (eShopLegacyMVC.Test) still has a `<Reference Include="System.Messaging" />` — that's M2-T2, a separate task.

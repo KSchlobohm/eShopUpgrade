@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Experimental.System.Messaging</id>
+    <version>1.1.0</version>
+    <authors>Original author: Microsoft Corporation, Code ported by: Jung Hyun, Nam</authors>
+    <owners>Original author: Microsoft Corporation, Code ported by: Jung Hyun, Nam</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="file">LICENSE.txt</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <projectUrl>https://referencesource.microsoft.com/#System.Messaging</projectUrl>
+    <description>This package is a counterfeit of the .NET Framework version System.Messaging assembly for .NET Core applications running on Windows Client and Windows Server. It is provided for development convenience. Do not use this package if Microsoft officially releases this package again. Also, once it is released, you should migrate the code to the new package.
+
+The source code for this package is excerpted from the .NET Framework reference source code.</description>
+    <releaseNotes>1.1.0 - Fix Trustee class namespace</releaseNotes>
+    <copyright>© Microsoft Corporation.  All rights reserved.</copyright>
+    <tags>MSMQ,Fork,Experimental</tags>
+    <repository url="https://github.com/dotnetdev-kr/Experimental.System.Messaging" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>
