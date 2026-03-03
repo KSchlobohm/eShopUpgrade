@@ -21,3 +21,5 @@
 <!-- Append entries below -->
 
 📌 Team update (2026-03-03T22:07): McManus completed M1-T1 — manual SDK-style conversion of eShopLegacy.Common targeting net461. upgrade-assistant incompatible with MSBuild 17.14; manual conversion applied. EntityFramework 6.0.0 migrated to PackageReference. Full solution builds successfully. Same pattern to be used for M1-T2 (Utilities) and M1-T3 (Test). — decided by McManus
+
+📌 **M1-T4 Verification (2026-03-03):** Full solution build + test pass after SDK-style conversion of Common, Utilities, and Test projects. Build: 0 errors, 0 warnings (matches M0 baseline). Tests: 31 passed, 0 failed, 0 skipped (matches M0 baseline). No regressions detected. `msbuild /t:Restore` works for SDK-style projects; `dotnet test --no-build` works for SDK-style test project. M1-T4 marked completed; M1 milestone marked completed in tasks.json.
