@@ -93,3 +93,12 @@
 - BinaryFormatter is completely removed in .NET 9+ (not just obsolete). Conditional compilation is the cleanest approach for multi-target.
 - `System.ComponentModel.DataAnnotations` needs explicit `<Reference>` on net461 SDK-style but is built-in on net10.0 — must be conditional.
 - NETSDK1233 warning about .NET 10 in VS2022 17.14 is expected (preview SDK). Does not affect compilation.
+
+📌 **M4-T2 completed:** Retargeted eShopLegacy.Utilities from net461 to multi-target `net461;net10.0`. Used multi-targeting (same pattern as Common in M4-T1) because the web project and test project still reference Utilities on net461/net472. Applied conditional compilation in WebHelper.cs: on NETFRAMEWORK, keeps `System.Web.HttpContext.Current.Request.UserAgent`; on net10.0, provides a static accessor pattern (`SetUserAgentAccessor()`) that returns empty string by default and can be wired up in M5 when the web project migrates to ASP.NET Core. Made `System.Web` reference conditional (net461 only). Full solution builds, all 31 tests pass.
+
+**Gotchas:**
+- WebHelper.UserAgent is actively used in `_Layout.cshtml` (`@WebHelper.UserAgent`) — cannot be removed, must be preserved on both targets.
+- The net10.0 `SetUserAgentAccessor(Func<string>)` pattern allows M5 to hook this up via `IHttpContextAccessor` in ASP.NET Core startup without changing the static API surface.
+- No new NuGet packages needed for the net10.0 target — the stub pattern avoids adding `Microsoft.AspNetCore.Http` as a dependency to this library project.
+
+📌 **M4-T3 already completed in M4-T1:** BinaryFormatter replacement in Serializing.cs was done during the Common retarget (M4-T1). Conditional compilation (`#if NETFRAMEWORK` keeps BinaryFormatter; net10.0 uses System.Text.Json) was applied. Marked M4-T3 as completed in tasks.json since the work is already done.

@@ -335,7 +335,7 @@
           "title": "Retarget eShopLegacy.Utilities to net10.0",
           "description": "Change TargetFramework to net10.0. Replace System.Web.HttpContext.Current.Request.UserAgent in WebHelper.cs â€” this uses System.Web which is unavailable on .NET 10. Use systemweb-adapters or redesign to accept HttpContext via DI. The BinaryFormatter usage in Serializing.cs is also obsolete/disabled in .NET 5+ and must be replaced.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m4-utilities-systemweb-removal.md",
           "files_affected": [
             "eShopLegacy.Utilities/eShopLegacy.Utilities.csproj",
@@ -356,7 +356,7 @@
           "title": "Replace BinaryFormatter in Serializing.cs",
           "description": "BinaryFormatter is obsolete and disabled by default in .NET 5+. Replace BinaryFormatter serialization in eShopLegacy.Common/Utilities/Serializing.cs with System.Text.Json or another supported serializer. This is used by FilesController (WebApi) to serialize BrandDTO objects.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m4-binaryformatter-replacement.md",
           "files_affected": [
             "eShopLegacy.Common/Utilities/Serializing.cs",
