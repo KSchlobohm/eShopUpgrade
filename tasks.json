@@ -924,7 +924,7 @@
       "title": "Test Project Migration",
       "description": "Retarget eShopLegacyMVC.Test to net10.0. Update test framework, mocks, and assertions. Fix tests broken by the ASP.NET Core migration (different base types, HttpContext mocking changes).",
       "order": 10,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M9"
       ],
@@ -937,7 +937,7 @@
           "title": "Retarget test project to net10.0",
           "description": "Change TargetFramework to net10.0. Update MSTest to 3.x. Ensure Moq and Castle.Core are compatible. Add Microsoft.AspNetCore.Mvc.Testing if integration tests are needed.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m10-test-migration.md",
           "files_affected": [
             "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj"
@@ -951,7 +951,7 @@
           "title": "Fix CatalogControllerTest for ASP.NET Core",
           "description": "Update CatalogControllerTest to use ASP.NET Core types. Replace System.Web.Mvc.ActionResult, HttpStatusCodeResult, ViewResult, RedirectToRouteResult with ASP.NET Core equivalents. Update mock setup for new controller constructor signatures.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC.Test/Controllers/CatalogControllerTest.cs"
           ],
@@ -966,7 +966,7 @@
           "title": "Fix PicControllerTest for ASP.NET Core",
           "description": "Update PicControllerTest to use ASP.NET Core HttpContext mocking instead of System.Web mocks. Replace HttpContextBase, HttpServerUtilityBase, HttpRequestBase with ASP.NET Core DefaultHttpContext or mock IWebHostEnvironment.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC.Test/Controllers/PicControllerTest.cs"
           ],
@@ -981,7 +981,7 @@
           "title": "Fix FileServiceTest for ASP.NET Core",
           "description": "Update FileServiceTest to use IFormFile instead of HttpFileCollectionBase mocks. The mock setup for UploadFile will need to change to IFormFileCollection.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC.Test/Services/FileServiceTest.cs"
           ],
@@ -996,7 +996,7 @@
           "title": "Fix CatalogDBContextTest for EF Core",
           "description": "Update CatalogDBContextTest and InMemoryCatalogDBContext to use EF Core InMemory provider or SQLite in-memory. Replace Database.SetInitializer with EF Core configuration. Update DbSetExtensions helper.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC.Test/Models/CatalogDBContextTest.cs",
             "eShopLegacyMVC.Test/DbSetExtensions.cs"
@@ -1012,7 +1012,7 @@
           "title": "Verify all tests pass",
           "description": "Run dotnet test to verify all tests pass on .NET 10.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M10-T2",
@@ -1030,7 +1030,7 @@
       "title": "Final Verification",
       "description": "Final end-to-end verification that the fully migrated solution meets all done criteria: zero warnings, zero errors, app starts and responds to requests.",
       "order": 11,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M10"
       ],
@@ -1043,7 +1043,7 @@
           "title": "Build with warnings-as-errors",
           "description": "Run dotnet build eShopLegacyMVC.sln /p:TreatWarningsAsErrors=true to verify zero warnings across all projects.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [],
           "skills": [],
@@ -1054,7 +1054,7 @@
           "title": "Verify app startup",
           "description": "Run dotnet run on the web project and verify it starts and responds to HTTP requests on the configured port.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M11-T1"
@@ -1067,7 +1067,7 @@
           "title": "Final test run",
           "description": "Run the complete test suite one final time to confirm everything passes.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M11-T1"
@@ -1080,7 +1080,7 @@
           "title": "Architecture review sign-off",
           "description": "Review the final migrated solution for architectural correctness. Verify: all projects target net10.0, no legacy packages.config, no System.Web references outside adapters, clean DI registration, proper ASP.NET Core patterns.",
           "assigned_to": "Keaton",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M11-T2",
