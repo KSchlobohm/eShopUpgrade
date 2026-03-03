@@ -33,3 +33,11 @@
 <!-- Append entries below -->
 
 📌 Team update (2026-03-03T22:07): Hockney completed M0 baseline verification — Build succeeded with 0 warnings, 0 errors. All 31 MSTest tests pass. Baseline report written to docs/migration/m0-baseline-report.md. Key note: nuget.exe restore required (not dotnet restore) for packages.config projects. Environment: VS2022 Enterprise MSBuild 17.14.40, vstest.console 18.3.0. — decided by Hockney
+
+📌 **M1-T3 completed:** Converted eShopLegacyMVC.Test from legacy .csproj to SDK-style format targeting net472. Manual conversion (same approach as M1-T1 and M1-T2). Converted 10 NuGet packages from packages.config to PackageReference (Castle.Core 5.1.1, EntityFramework 6.2.0, Microsoft.AspNet.Mvc 5.2.7, Microsoft.AspNet.Razor 3.2.7, Microsoft.AspNet.WebPages 3.2.7, Microsoft.Web.Infrastructure 1.0.0.0, Moq 4.20.72, MSTest.TestAdapter 2.2.10, MSTest.TestFramework 2.2.10). Added Microsoft.NET.Test.Sdk 17.3.2 to enable `dotnet test` support. Preserved ProjectReferences to eShopLegacy.Common and eShopLegacyMVC. Kept explicit framework references for Microsoft.CSharp, System.ComponentModel.DataAnnotations, System.Configuration, System.Messaging, System.Web. Set GenerateAssemblyInfo=false. Fixed app.config System.Threading.Tasks.Extensions binding redirect. Removed packages.config, cleaned bin/obj. Full solution builds, all 31 tests pass via `dotnet test`.
+
+**Gotchas:**
+- `Microsoft.CSharp` must be kept as explicit `<Reference>` — SDK-style net472 projects don't auto-reference it, and the test code uses the `dynamic` keyword which requires `Microsoft.CSharp.RuntimeBinder`.
+- EntityFramework 6.2.0 was in the old csproj as a direct assembly reference but NOT in packages.config — added it as PackageReference since test code directly uses EF types (CatalogDBContextTest.cs, DbSetExtensions.cs).
+- The app.config binding redirect for System.Threading.Tasks.Extensions needed updating from version 4.2.0.0 to 4.2.0.1 to match the NuGet package version 4.5.4.
+- `Microsoft.NET.Test.Sdk` was added (not in original project) to enable SDK-style test discovery with `dotnet test`.

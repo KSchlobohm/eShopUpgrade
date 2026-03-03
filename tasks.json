@@ -127,7 +127,7 @@
           "title": "Convert eShopLegacyMVC.Test to SDK-style",
           "description": "Run dnx upgrade-assistant on eShopLegacyMVC.Test.csproj. This project targets net472 and has MSTest 2.2.10, Moq 4.20.72, Castle.Core 5.1.1, ASP.NET MVC 5, EntityFramework 6.2.0, and System.Messaging references. Preserve all PackageReferences and ProjectReferences.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m1-sdk-style-conversion.md",
           "files_affected": [
             "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj",
