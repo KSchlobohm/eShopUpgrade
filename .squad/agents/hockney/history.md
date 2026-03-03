@@ -30,3 +30,10 @@
 - **Clean build:** 0 errors, 0 warnings across all 4 projects (Release configuration). Matches M0 baseline.
 - **Tests:** 31 passed, 0 failed, 0 skipped (matches M0 baseline). No regressions.
 - **tasks.json updated:** M2-T3 → completed, M2-T2 normalized to "completed", M2 milestone → completed. M1 was already completed.
+
+📌 **M3-T4 Verification (2026-03-04):** NuGet package updates fully verified. All checks passed:
+- **Package updates verified:** M3-T2 updated EntityFramework 6.0.0→6.2.0 (Common), Newtonsoft.Json 12.0.1→13.0.3, log4net 2.0.8→3.0.4 (web). M3-T3 updated MSTest 2.2.10→3.7.3, Microsoft.NET.Test.Sdk 17.3.2→17.12.0, Castle.Core 5.1.1→5.2.1 (test).
+- **Clean build:** 0 errors, 0 warnings across all 4 projects (Release configuration). Matches M0 baseline.
+- **Tests:** 31 passed, 0 failed, 0 skipped (matches M0 baseline). No regressions.
+- **NuGet restore notes:** 5 pre-existing vulnerability warnings (jQuery 3.3.1, jQuery.Validation 1.17.0, Identity.Owin 2.2.3) — these are not M3-related and will be addressed in downstream milestones.
+- **tasks.json updated:** M3-T4 → completed, M3 milestone → completed.

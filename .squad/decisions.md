@@ -249,3 +249,91 @@
 **Impact on Hockney (Test):** Testing packages (MSTest, Moq) have full .NET 10 support; no test migration blocking issues.
 
 **Decision:** All 9 recommendations in matrix are approved for implementation in M3-T2, M3-T3, M3-T4, and downstream milestones.
+
+### 2026-03-04: Hockney — M3-T4 Verification: NuGet Package Updates Regression Test
+**By:** Hockney (QA / Test Lead)
+**Task:** M3-T4
+**Status:** Completed
+
+**Decision:** Verify M3 (NuGet package updates) complete with zero regressions; confirm updated packages build and test cleanly.
+
+**Findings:**
+1. Zero regressions — baseline maintained (31/31 tests pass, 0 warnings, 0 errors)
+2. All package updates from M3-T2 and M3-T3 verified: EntityFramework 6.2.0, Newtonsoft.Json 13.0.3, log4net 3.0.4, MSTest 3.7.3, Microsoft.NET.Test.Sdk 17.12.0, Castle.Core 5.2.1
+3. Pre-existing NuGet vulnerability warnings noted for jQuery 3.3.1, jQuery.Validation 1.17.0, Identity.Owin 2.2.3 — not M3-related, tracked for downstream milestones
+
+**Validation:** Clean build (Release), full test pass, baseline maintained.
+
+**M3 Milestone Status:** ✅ COMPLETE
+
+### M3-T2 & M3-T3: NuGet Package Updates to Latest Compatible Versions
+**By:** McManus (Developer)
+**Tasks:** M3-T2, M3-T3
+**Status:** Completed
+**Date:** 2026-03-03
+
+**What was done:**
+
+**Library Projects (M3-T2):**
+- eShopLegacy.Common: EntityFramework 6.0.0 → 6.2.0 (aligned with web project)
+- eShopLegacy.Utilities: Verified clean, no packages to update
+- eShopLegacyMVC (legacy csproj, packages.config):
+  - Newtonsoft.Json 12.0.1 → 13.0.3 (security fix for CVE-2024-21907)
+  - log4net 2.0.8 → 3.0.4 (latest stable, targets net462/netstandard2.0)
+  - Updated csproj HintPaths, packages.config, Web.config binding redirect
+
+**Test Project (M3-T3):**
+- MSTest.TestFramework 2.2.10 → 3.7.3
+- MSTest.TestAdapter 2.2.10 → 3.7.3
+- Microsoft.NET.Test.Sdk 17.3.2 → 17.12.0
+- Castle.Core 5.1.1 → 5.2.1
+- Moq 4.20.72 kept (already compatible)
+- Fixed Newtonsoft.Json binding redirect in app.config
+
+**NOT touched (per plan):**
+- ASP.NET MVC/WebAPI/OWIN/Identity packages (M5-M8)
+- EntityFramework in web project (M6)
+- Autofac packages (M7)
+- Application Insights packages (breaking changes, deferred)
+- jQuery/bootstrap/client-side packages (deferred)
+
+**Why:**
+- Newtonsoft.Json 13.0.3 patches CVE-2024-21907 — mandatory security update.
+- log4net 3.0.4 provides .NET Standard 2.0 support needed for eventual .NET 10 migration.
+- MSTest 3.7.3 is the modern test framework with better .NET 10 support.
+- Castle.Core 5.2.1 adds .NET 10 compatibility.
+- EntityFramework 6.2.0 aligns Common with the web project (EF Core migration is M6).
+
+**Validation:** Full solution builds (0 errors, 0 warnings). All 31 tests pass.
+
+**Impact on Hockney:** M3-T4 verification can proceed — solution is green.
+**Impact on Keaton:** M3 milestone nearly complete, only M3-T4 (verification) remains.
+
+### 2026-03-04: McManus — M4-T1: Retarget eShopLegacy.Common from net461 to net10.0
+**By:** McManus (Developer)
+**Task:** M4-T1
+**Status:** Completed
+
+**Decision:** Multi-target `net461;net10.0` instead of net10.0-only. Remove unused EntityFramework reference. Replace BinaryFormatter with System.Text.Json via conditional compilation.
+
+**Why multi-target:**
+Three projects reference eShopLegacy.Common (Utilities net461, Test net472, Web net472). Going net10.0-only would break the entire solution. Multi-targeting keeps the full solution building while adding net10.0 support. The net461 target will be dropped after M5 (web project migration).
+
+**Key finding — EF 6.5.1 supports .NET 6+:**
+EntityFramework 6.5.1 targets netstandard2.1 and .NET 6+. This means the team does NOT need to migrate to EF Core just for .NET 10 compatibility. EF6 6.5.1 can run on net10.0. However, since Common's source code does NOT use any EF6 types, the reference was removed entirely from this project. Other projects (web, test) that actually use EF6 can upgrade to 6.5.1 in M6 if the team decides against EF Core migration.
+
+**What was done:**
+1. Changed `<TargetFramework>net461</TargetFramework>` → `<TargetFrameworks>net461;net10.0</TargetFrameworks>`
+2. Removed `EntityFramework 6.2.0` PackageReference — no source files in Common use EF6 types
+3. Made `System.ComponentModel.DataAnnotations` reference conditional (net461 only; built-in on net10.0)
+4. Removed unused `using System.Web;` from CatalogBrand.cs and CatalogType.cs
+5. Replaced BinaryFormatter in Serializing.cs with conditional compilation: net461 keeps BinaryFormatter, net10.0 uses System.Text.Json
+6. Removed App.config EF section (no longer needed)
+
+**Impact on M4-T2 (Utilities retarget):** Utilities references Common. With multi-targeting, Utilities (net461) will pick up Common's net461 assembly. When Utilities is retargeted, the same multi-target pattern should be used.
+
+**Impact on M4-T3 (BinaryFormatter replacement):** Partially addressed. The net10.0 code path now uses System.Text.Json. M4-T3 may still need to address the net461 path and update FilesController.cs to work with the new serialization.
+
+**Impact on M6 (EF migration):** EF 6.5.1 is an option as a stepping stone — supports .NET 10 without rewriting to EF Core. Team should decide whether to use EF 6.5.1 as intermediate step or go directly to EF Core.
+
+**Validation:** Full solution builds (0 errors). All 31 tests pass. Only warning is NETSDK1233 about .NET 10 preview support in VS2022 17.14 (expected).
