@@ -55,3 +55,27 @@
 - No test source files in eShopLegacyMVC.Test use `System.Messaging` or `Experimental.System.Messaging` directly — the assembly reference existed solely for transitive type resolution from the web project.
 - Since the test project is SDK-style, adding Experimental.System.Messaging as a `<PackageReference>` is straightforward (no manual DLL download needed, unlike the legacy web project in M2-T1).
 - v1.1.0 (netstandard2.0) is required; v1.2.0 targets net8.0 only and won't work with net472.
+
+📌 **M3-T2 completed:** Updated NuGet packages in library and web projects.
+- **eShopLegacy.Common:** EntityFramework 6.0.0 → 6.2.0 (aligned with web project; EF Core migration deferred to M6).
+- **eShopLegacy.Utilities:** Verified clean — no NuGet packages, no changes needed.
+- **eShopLegacyMVC (legacy csproj):** Newtonsoft.Json 12.0.1 → 13.0.3 (CVE-2024-21907 security fix, no breaking changes). log4net 2.0.8 → 3.0.4 (targets net462/netstandard2.0, compatible with net472). Updated csproj HintPaths, packages.config, Web.config binding redirect.
+- Did NOT touch: ASP.NET MVC/WebAPI/OWIN/Identity (M5-M8), EntityFramework in web project (M6), Autofac (M7), Application Insights (breaking changes, deferred).
+
+**Gotchas:**
+- Newtonsoft.Json 13.x assembly version is 13.0.0.0 (not 13.0.3.0) — binding redirects must use assembly version, not package version.
+- log4net 3.0.4 targets net462 (not net45-full like 2.0.8) — the HintPath lib folder name changed from `net45-full` to `net462`.
+- nuget.exe was not pre-installed in this environment — had to download it to handle packages.config restore for the legacy web project.
+
+📌 **M3-T3 completed:** Updated test project packages.
+- MSTest.TestFramework 2.2.10 → 3.7.3, MSTest.TestAdapter 2.2.10 → 3.7.3 (MSTest 3.x with net472 support).
+- Microsoft.NET.Test.Sdk 17.3.2 → 17.12.0.
+- Castle.Core 5.1.1 → 5.2.1 (minor update, no breaking changes).
+- Moq 4.20.72 kept as-is (already latest compatible).
+- Fixed Newtonsoft.Json binding redirect in app.config (12.0.0.0 → 13.0.0.0) to match web project update.
+
+**Gotchas:**
+- MSTest 3.x auto-includes MSTest.Analyzers as a transitive dependency — no issues but adds analyzer warnings to the build.
+- The test project's app.config binding redirect for Newtonsoft.Json had to be updated to match the web project's new version, otherwise the build emits warning MSB3836.
+
+**Validation:** Full solution builds with 0 errors, 0 warnings. All 31 tests pass via `dotnet test`.

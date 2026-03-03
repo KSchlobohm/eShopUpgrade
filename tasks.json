@@ -162,7 +162,7 @@
       "title": "MSMQ Replacement",
       "description": "Replace System.Messaging (MSMQ) with Experimental.System.Messaging NuGet package. Update namespace references from System.Messaging to Experimental.System.Messaging in all affected files.",
       "order": 2,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M1"
       ],
@@ -193,7 +193,7 @@
           "title": "Replace System.Messaging in test project",
           "description": "Remove System.Messaging assembly reference from eShopLegacyMVC.Test.csproj. Add Experimental.System.Messaging package if test code references MSMQ types.",
           "assigned_to": "McManus",
-          "status": "done",
+          "status": "completed",
           "files_affected": [
             "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj"
           ],
@@ -210,7 +210,7 @@
           "title": "Verify MSMQ replacement",
           "description": "Build solution and run tests to confirm MSMQ replacement didn't break anything.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M2-T2"
@@ -252,11 +252,14 @@
         {
           "id": "M3-T2",
           "title": "Update library project packages",
-          "description": "Update EntityFramework in eShopLegacy.Common from 6.0.0 to 6.5.1 (latest EF6 with netstandard2.1 support). This is a holding pattern before EF Core migration in M5.",
+          "description": "Updated EntityFramework in eShopLegacy.Common from 6.0.0 to 6.2.0 (matching web project). Updated Newtonsoft.Json 12.0.1 to 13.0.3 (CVE-2024-21907 fix) and log4net 2.0.8 to 3.0.4 in eShopLegacyMVC web project. eShopLegacy.Utilities verified clean (no packages).",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "done",
           "files_affected": [
-            "eShopLegacy.Common/eShopLegacy.Common.csproj"
+            "eShopLegacy.Common/eShopLegacy.Common.csproj",
+            "eShopLegacyMVC/eShopLegacyMVC.csproj",
+            "eShopLegacyMVC/packages.config",
+            "eShopLegacyMVC/Web.config"
           ],
           "depends_on": [
             "M3-T1"
@@ -267,11 +270,12 @@
         {
           "id": "M3-T3",
           "title": "Update test project packages",
-          "description": "Upgrade MSTest to 3.x, ensure Moq 4.20.72 and Castle.Core 5.1.1 are compatible. Remove ASP.NET MVC 5 references that will be replaced during web migration.",
+          "description": "Updated MSTest.TestFramework and MSTest.TestAdapter from 2.2.10 to 3.7.3. Updated Microsoft.NET.Test.Sdk from 17.3.2 to 17.12.0. Updated Castle.Core from 5.1.1 to 5.2.1. Moq 4.20.72 kept (already compatible). Fixed Newtonsoft.Json binding redirect in app.config.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "done",
           "files_affected": [
-            "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj"
+            "eShopLegacyMVC.Test/eShopLegacyMVC.Test.csproj",
+            "eShopLegacyMVC.Test/app.config"
           ],
           "depends_on": [
             "M3-T1"
