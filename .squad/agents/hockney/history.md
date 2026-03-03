@@ -23,3 +23,10 @@
 📌 Team update (2026-03-03T22:07): McManus completed M1-T1 — manual SDK-style conversion of eShopLegacy.Common targeting net461. upgrade-assistant incompatible with MSBuild 17.14; manual conversion applied. EntityFramework 6.0.0 migrated to PackageReference. Full solution builds successfully. Same pattern to be used for M1-T2 (Utilities) and M1-T3 (Test). — decided by McManus
 
 📌 **M1-T4 Verification (2026-03-03):** Full solution build + test pass after SDK-style conversion of Common, Utilities, and Test projects. Build: 0 errors, 0 warnings (matches M0 baseline). Tests: 31 passed, 0 failed, 0 skipped (matches M0 baseline). No regressions detected. `msbuild /t:Restore` works for SDK-style projects; `dotnet test --no-build` works for SDK-style test project. M1-T4 marked completed; M1 milestone marked completed in tasks.json.
+
+📌 **M2-T3 Verification (2026-03-04):** MSMQ replacement fully verified. All checks passed:
+- **No bare System.Messaging references:** Searched all .cs and .csproj files — zero matches for `using System.Messaging;` or `<Reference Include="System.Messaging" />`. Only `Experimental.System.Messaging` references found (correct).
+- **Experimental.System.Messaging v1.1.0 properly referenced:** eShopLegacyMVC.csproj has assembly reference with HintPath + packages.config entry. eShopLegacyMVC.Test.csproj has PackageReference. CatalogController.cs uses `using Experimental.System.Messaging;`.
+- **Clean build:** 0 errors, 0 warnings across all 4 projects (Release configuration). Matches M0 baseline.
+- **Tests:** 31 passed, 0 failed, 0 skipped (matches M0 baseline). No regressions.
+- **tasks.json updated:** M2-T3 → completed, M2-T2 normalized to "completed", M2 milestone → completed. M1 was already completed.
