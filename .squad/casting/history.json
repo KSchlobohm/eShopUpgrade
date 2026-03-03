@@ -1,0 +1,14 @@
+[
+  {
+    "assignment_id": "eshop-upgrade-001",
+    "universe": "The Usual Suspects",
+    "created_at": "2026-03-03T21:38:12Z",
+    "agents": [
+      { "name": "Keaton", "role": "Lead" },
+      { "name": "McManus", "role": ".NET Dev" },
+      { "name": "Fenster", "role": "Researcher" },
+      { "name": "Hockney", "role": "Tester" }
+    ],
+    "context": "eShopLegacyMVC .NET Framework 4.7.2 to .NET 10 upgrade"
+  }
+]
