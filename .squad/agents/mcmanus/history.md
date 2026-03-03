@@ -24,6 +24,12 @@
 - SDK-style net461 projects automatically reference most framework assemblies, but `System.ComponentModel.DataAnnotations` still needs an explicit `<Reference>`.
 - `System.Web` using directives in CatalogBrand.cs and CatalogType.cs compile fine because net461 SDK-style projects resolve them through framework assembly references.
 
+📌 **M1-T2 completed:** Converted eShopLegacy.Utilities from legacy .csproj to SDK-style format targeting net461. Manual conversion (same as M1-T1 — upgrade-assistant unavailable). Project had no NuGet packages (no packages.config), so no PackageReference entries needed. Kept explicit `<Reference Include="System.Web" />` since WebHelper.cs uses `HttpContext.Current`. Preserved ProjectReference to eShopLegacy.Common. Set `GenerateAssemblyInfo=false` to preserve existing AssemblyInfo.cs. Cleaned bin/obj. Full solution (all 4 projects) builds successfully.
+
+**Gotchas:**
+- Utilities has no packages.config at all — it's purely framework references + project reference. Simpler conversion than Common.
+- `System.Web` must be kept as explicit `<Reference>` — SDK-style net461 projects don't auto-reference it.
+
 <!-- Append entries below -->
 
 📌 Team update (2026-03-03T22:07): Hockney completed M0 baseline verification — Build succeeded with 0 warnings, 0 errors. All 31 MSTest tests pass. Baseline report written to docs/migration/m0-baseline-report.md. Key note: nuget.exe restore required (not dotnet restore) for packages.config projects. Environment: VS2022 Enterprise MSBuild 17.14.40, vstest.console 18.3.0. — decided by Hockney

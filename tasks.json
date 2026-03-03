@@ -108,7 +108,7 @@
           "title": "Convert eShopLegacy.Utilities to SDK-style",
           "description": "Run dnx upgrade-assistant on eShopLegacy.Utilities.csproj. This project targets net461, has no NuGet packages, but references System.Web and eShopLegacy.Common. The System.Web reference will need attention in later milestones.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m1-sdk-style-conversion.md",
           "files_affected": [
             "eShopLegacy.Utilities/eShopLegacy.Utilities.csproj",
