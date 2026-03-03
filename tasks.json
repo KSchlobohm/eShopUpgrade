@@ -225,7 +225,7 @@
       "title": "NuGet Package Updates",
       "description": "Update all NuGet packages to versions compatible with .NET 10. Replace Framework-only packages with .NET Core equivalents. This is a research-heavy milestone to identify compatible replacement versions.",
       "order": 3,
-      "status": "not_started",
+      "status": "completed",
       "depends_on": [
         "M2"
       ],
@@ -288,7 +288,7 @@
           "title": "Verify package updates",
           "description": "Full solution rebuild and test run after package updates.",
           "assigned_to": "Hockney",
-          "status": "not_started",
+          "status": "completed",
           "files_affected": [],
           "depends_on": [
             "M3-T2",
@@ -304,7 +304,7 @@
       "title": "Target Framework Update to .NET 10",
       "description": "Retarget all non-web projects from .NET Framework to net10.0. The library projects (Common, Utilities) must be retargeted first, then the test project. The web project (eShopLegacyMVC) will be handled in M5 as a side-by-side ASP.NET Core migration.",
       "order": 4,
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         "M3"
       ],
@@ -317,7 +317,7 @@
           "title": "Retarget eShopLegacy.Common to net10.0",
           "description": "Change TargetFramework from net461 to net10.0 in eShopLegacy.Common.csproj. Replace EntityFramework 6.x with Microsoft.EntityFrameworkCore (or keep EF6 via EntityFramework 6.5.1 which supports netstandard2.1). Remove System.Web usings from CatalogBrand.cs and CatalogType.cs (they import System.Web but don't use it). Fix any API incompatibilities.",
           "assigned_to": "McManus",
-          "status": "not_started",
+          "status": "completed",
           "challenge_doc": "docs/migration/m4-target-framework-update.md",
           "files_affected": [
             "eShopLegacy.Common/eShopLegacy.Common.csproj",

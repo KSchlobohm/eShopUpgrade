@@ -79,3 +79,17 @@
 - The test project's app.config binding redirect for Newtonsoft.Json had to be updated to match the web project's new version, otherwise the build emits warning MSB3836.
 
 **Validation:** Full solution builds with 0 errors, 0 warnings. All 31 tests pass via `dotnet test`.
+
+📌 **M4-T1 completed:** Retargeted eShopLegacy.Common from net461 to multi-target `net461;net10.0`. Used multi-targeting because three projects (Utilities, Test, Web) still reference Common on net461/net472. Removed EntityFramework 6.2.0 PackageReference — no source files in Common use EF6 types (the reference was vestigial). Removed unused `using System.Web;` from CatalogBrand.cs and CatalogType.cs. Replaced BinaryFormatter in Serializing.cs with conditional compilation (`#if NETFRAMEWORK` keeps BinaryFormatter; net10.0 uses System.Text.Json). Made System.ComponentModel.DataAnnotations reference conditional (net461 only; built-in on net10.0). Full solution builds, all 31 tests pass.
+
+**Key discovery — EF 6.5.1 supports .NET 6+:**
+- EntityFramework 6.5.1 targets netstandard2.1 and .NET 6+
+- This means EF6 CAN run on net10.0 without migrating to EF Core
+- The team has an option to use EF 6.5.1 as a stepping stone before full EF Core migration in M6
+- Common didn't use EF6 so the reference was simply removed
+
+**Gotchas:**
+- `System.Web` using directives in CatalogBrand.cs and CatalogType.cs were entirely unused — no actual System.Web API calls, safe to remove.
+- BinaryFormatter is completely removed in .NET 9+ (not just obsolete). Conditional compilation is the cleanest approach for multi-target.
+- `System.ComponentModel.DataAnnotations` needs explicit `<Reference>` on net461 SDK-style but is built-in on net10.0 — must be conditional.
+- NETSDK1233 warning about .NET 10 in VS2022 17.14 is expected (preview SDK). Does not affect compilation.
