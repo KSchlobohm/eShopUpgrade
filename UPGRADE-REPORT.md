@@ -85,6 +85,46 @@ The migration kept log4net 3.0.4 with `LogManager.GetLogger()` calls throughout.
 
 ---
 
+## Sprint Retrospective
+
+*After the migration was complete, each team member reflected on the project — what they learned, what the report missed, and what they'd do differently.*
+
+### Keaton (Lead / Migration Architect)
+
+> The EF6 6.5.1 discovery was almost accidental. Fenster's original research still recommended EF Core 9.0.0; I caught the EF6 .NET 6+ support while retargeting Common in M4-T1. That one finding eliminated the highest-risk milestone and probably saved 40% of the total effort. **Lesson: always verify your assumptions about what's compatible before committing to a rewrite path.**
+>
+> I own the M5–M9 milestone fiction. Five milestones looked clean on paper, but ASP.NET Core's all-or-nothing startup model made independent verification impossible. I should have planned M5 as one milestone with internal checkpoints instead of five fake milestones.
+>
+> **Process observation:** The squad model worked well for M0–M4 — Fenster researched, McManus coded, Hockney verified, and I reviewed in parallel. But during M5–M9, the squad collapsed into McManus doing everything serially. The web migration phase is inherently single-threaded. Future migrations should staff accordingly.
+
+### McManus (.NET Developer)
+
+> What would've helped me most: a **System.Web → ASP.NET Core translation cheat sheet**. `HttpContext.Current` → `IHttpContextAccessor`, `Server.MapPath` → `IWebHostEnvironment.ContentRootPath`, `ConfigurationManager.AppSettings` → `IConfiguration`, `Request.Files[0]` → `IFormFile`, `MimeMapping.GetMimeMapping` → `FileExtensionContentTypeProvider` — I looked up each one individually. A pre-built list of the 20 most common patterns would have cut hours.
+>
+> The static file moves (`Content/`, `Scripts/`, `Pics/`, `fonts/` → `wwwroot/`) touched 47 view files and every asset reference. ASP.NET Core's static file middleware could have been configured to serve from legacy paths during transition, then moved to `wwwroot/` in a cleanup milestone. That would've kept the migration diff much smaller.
+
+### Fenster (Research Analyst)
+
+> I completely missed the static file restructuring burden. ASP.NET Core's `wwwroot/` convention wasn't flagged as a challenge, and it created a massive diff.
+>
+> The report says "0 warnings" but doesn't mention the `<NoWarn>CA1416</NoWarn>` suppression in the web csproj. That suppresses Windows-specific API warnings (from `Experimental.System.Messaging`). Not necessarily wrong, but it's hidden risk that should be disclosed.
+>
+> I also traced `ApplicationUser.ZipCode`'s synchronous HTTP call to its source: `WeatherService.cs` still has `.Result` calls on async `HttpClient` methods (lines 24, 27). That's a thread pool starvation risk under load on Kestrel. ZipCode was cleaned up during Identity migration, but the underlying pattern survived in WeatherService.
+>
+> **Process reflection:** Research-first worked, but I should feed findings *iteratively* during implementation — not just upfront. A "pre-flight check" before each major milestone would've caught the static file issue and the milestone atomicity problem.
+
+### Hockney (QA / Test Lead)
+
+> "31/31 tests pass" is technically true but **deeply misleading.** Those tests instantiate controllers directly — no `WebApplicationFactory`, no middleware pipeline, no authentication flow, no static file serving, no session mechanics.
+>
+> **Untested controllers:** BrandsController, FilesController, CatalogController2 (API), AccountController, DocumentsController, AspNetSessionController — all have ZERO tests.
+>
+> **Breaking API change:** The FilesController endpoint (`/api/files`) now returns JSON instead of BinaryFormatter-serialized data. If external consumers expected binary format, they'll break. No test validates this endpoint's contract.
+>
+> **The migration succeeded from a compiler perspective. Runtime behavior is an open question.**
+
+---
+
 ## Artifacts in This Branch
 
 | Path | Description |
@@ -132,6 +172,9 @@ cc17019 M1-T1: Convert eShopLegacy.Common to SDK-style project format
 4. **Replace log4net with ILogger** — adopt Microsoft.Extensions.Logging
 5. **Refactor `ApplicationUser.ZipCode`** — synchronous HTTP in a getter is a production risk
 6. **Remove the `net461` target from library projects** — now that all consumers are net10.0
-7. **Consider EF Core migration** — EF6 6.5.1 works, but EF Core offers LINQ improvements, compiled queries, and better async support
-8. **Add Application Insights / OpenTelemetry** — the legacy App Insights integration was removed during migration
-9. **Clean up `.squad/` artifacts** — useful for audit trail, but not needed in production branches
+7. **Fix WeatherService sync-over-async** — `.Result` calls on `HttpClient` (lines 24, 27) will deadlock under load on Kestrel
+8. **Audit `CA1416` NoWarn suppression** — Windows-specific API warnings are suppressed in the web csproj; verify this is intentional
+9. **Verify `/api/files` contract change** — BinaryFormatter → JSON is a breaking API change for external consumers
+10. **Consider EF Core migration** — EF6 6.5.1 works, but EF Core offers LINQ improvements, compiled queries, and better async support
+11. **Add Application Insights / OpenTelemetry** — the legacy App Insights integration was removed during migration
+12. **Clean up `.squad/` artifacts** — useful for audit trail, but not needed in production branches
